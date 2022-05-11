@@ -3,8 +3,9 @@ import pandas as pd
 import os
 import csv
 
-folder = './simulated-data-raw-github/'
+folder = 'simulated-data-raw-github/'
 files = []
+dir = os.path.join('.','csv-github')
 
 with os.scandir(folder) as entries:
     for entry in entries:
@@ -12,13 +13,17 @@ with os.scandir(folder) as entries:
         files.append(name)
 
 files.sort()
+
+if os.path.exists(folder+'.DS_Store'):
+    os.remove(folder+'.DS_Store')
+
 for entry in files: 
     name = folder+entry
+    #print(name)
     with open(name, 'rb') as f:
-        newName = entry.replace(".pkl", ".csv")
-        print(newName)
         data = pickle.load(f)
-        #nome = './csv-github/'+entry.name.replace(".pkl", ".csv")
-        #df = pd.DataFrame(data)
-        #df.to_csv(nome, index=False)
- 
+        if not os.path.exists(dir):
+            os.mkdir(dir)    
+        nome = './csv-github/'+entry.replace(".pkl", ".csv")
+        df = pd.DataFrame(data)
+        df.to_csv(nome, index=False)
