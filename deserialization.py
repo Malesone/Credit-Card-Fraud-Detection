@@ -16,7 +16,8 @@ for entry in files:
     name = folder+entry
     with open(name, 'rb') as f:
         newName = entry.replace(".pkl", ".csv")
-        #data = pickle.load(f)
+        print(newName)
+        data = pickle.load(f)
         #nome = './csv-github/'+entry.name.replace(".pkl", ".csv")
         #df = pd.DataFrame(data)
         #df.to_csv(nome, index=False)
