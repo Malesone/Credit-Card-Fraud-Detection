@@ -14,12 +14,11 @@ with os.scandir(folder) as entries:
 
 files.sort()
 
-if os.path.exists(folder+'.DS_Store'):
-    os.remove(folder+'.DS_Store')
+#if os.path.exists(folder+'.DS_Store'):
+#    os.remove(folder+'.DS_Store')
 
 for entry in files: 
     name = folder+entry
-    #print(name)
     with open(name, 'rb') as f:
         data = pickle.load(f)
         if not os.path.exists(dir):
