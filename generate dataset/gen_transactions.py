@@ -3,7 +3,7 @@ import pandas as pd
 
 import random
 
-def generate_transactions_table(customer_profile, start_date = "2018-04-01", nb_days = 10):
+def generate_transactions_table(customer_profile, start_date = "2022-01-01", nb_days = 10):
     
     customer_transactions = []
     
