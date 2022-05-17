@@ -11,12 +11,6 @@ class App:
 
     def close(self):
         self.driver.close()
-
-    def create_customers(self, customers):
-        with self.driver.session() as session:
-            for row in customers.CUSTOMER_ID:
-                session.write_transaction(
-                    self._create_and_return_customers, row)
             
     @staticmethod
     def _create_and_return_customers(tx, person1_name):
@@ -26,11 +20,23 @@ class App:
         )
         tx.run(query, person1_name=person1_name)
 
-    def create_terminals(self, terminals):
+    def create_all(self, customers, terminals, transactions):
         with self.driver.session() as session:
+            for row in customers.CUSTOMER_ID: 
+                session.write_transaction(
+                    self._create_and_return_customers, row)
+
             for row in terminals.TERMINAL_ID:
                 session.write_transaction(
                     self._create_and_return_terminals, row)
+
+            for row in range(len(transactions)):
+                id = transactions.iloc[row].TRANSACTION_ID #ritorna un formato numpy.int64
+                idC = transactions.iloc[row].CUSTOMER_ID
+                idT = transactions.iloc[row].TERMINAL_ID
+                id_int = np.int64(id)
+                session.write_transaction(
+                    self._create_and_return_transactions, id_int.item(), idC, idT)
             
     @staticmethod
     def _create_and_return_terminals(tx, terminal):
@@ -40,17 +46,6 @@ class App:
         )
         tx.run(query, terminal=terminal)
 
-    def create_transactions(self, transactions):
-        with self.driver.session() as session:
-            for row in range(len(transactions)):
-                id = transactions.iloc[row].TRANSACTION_ID #ritorna un formato numpy.int64
-                idC = transactions.iloc[row].CUSTOMER_ID
-                idT = transactions.iloc[row].TERMINAL_ID
-                id_int = np.int64(id)
-                #print(type(idT))
-                session.write_transaction(
-                    self._create_and_return_transactions, id_int.item(), idC, idT)
-            
     @staticmethod
     def _create_and_return_transactions(tx, id, idC, idT):
         query = (
@@ -100,8 +95,5 @@ if __name__ == "__main__":
     app = App(uri, user, password)
     
     app.delete_all()
-    app.create_customers(customer)
-    app.create_terminals(terminal)
-    app.create_transactions(transaction)
-    
+    app.create_all(customer, terminal, transaction)
     app.close()
