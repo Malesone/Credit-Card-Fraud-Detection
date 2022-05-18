@@ -12,14 +12,7 @@ class App:
     def close(self):
         self.driver.close()
             
-    @staticmethod
-    def _create_and_return_customers(tx, person1_name):
-        query = (
-            "CREATE (c:Customer { name: $person1_name }) "
-            "RETURN c"
-        )
-        tx.run(query, person1_name=person1_name)
-
+    
     def create_all(self, customers, terminals, transactions):
         with self.driver.session() as session:
             for row in customers.CUSTOMER_ID: 
@@ -38,6 +31,14 @@ class App:
                 session.write_transaction(
                     self._create_and_return_transactions, id_int.item(), idC, idT)
             
+    @staticmethod
+    def _create_and_return_customers(tx, person1_name):
+        query = (
+            "CREATE (c:Customer { name: $person1_name }) "
+            "RETURN c"
+        )
+        tx.run(query, person1_name=person1_name)
+
     @staticmethod
     def _create_and_return_terminals(tx, terminal):
         query = (

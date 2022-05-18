@@ -42,9 +42,7 @@ def save_all():
     customer_profiles_table.to_pickle(DIR_OUTPUT+"customers.pkl", protocol=4)
     
     terminal_profiles_table = d.terminal_profiles_table
-    terminal_profiles_table.to_pickle(DIR_OUTPUT+"terminals.pkl", protocol=4)
-    
-    
+    terminal_profiles_table.to_pickle(DIR_OUTPUT+"terminals.pkl", protocol=4) 
 
 def deserializate(): 
     folder = 'pkl_all/'
@@ -184,9 +182,12 @@ class Dataset:
         return (nb_tx_per_day,nb_fraud_per_day,nb_fraudcard_per_day)
 
 d = Dataset()
-dataset = d.generate_dataset(10, 50, 10, "2022-01-01", 5)
-import sys
+def generate_all():
+    dataset = d.generate_dataset(10, 50, 10, "2022-01-01", 5)
+    #import sys
+    #print(sys.getsizeof(dataset))
+    save_all()
+    deserializate()
 
-#print(sys.getsizeof(dataset))
-save_all()
-deserializate()
+def get_dataset():
+    return (d.customer_profiles_table, d.terminal_profiles_table, d.transactions_df)
