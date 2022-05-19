@@ -1,4 +1,8 @@
+from datetime import date, datetime
+from time import strftime
+import neo4j
 from pytest import PytestCollectionWarning
+from sqlalchemy import Date
 from gen import generate_all, get_dataset
 from neo4j import GraphDatabase
 import logging
@@ -25,11 +29,14 @@ class App:
 
             for row in range(len(transactions)):
                 id = transactions.iloc[row].TRANSACTION_ID #ritorna un formato numpy.int64
+                id_int = np.int64(id)
                 idC = transactions.iloc[row].CUSTOMER_ID
                 idT = transactions.iloc[row].TERMINAL_ID
-                id_int = np.int64(id)
+                amount = transaction.iloc[row].TX_AMOUNT
+                date = transaction.iloc[row].TX_DATETIME #pandas._libs.tslibs.timestamps.Timestamp
+                
                 session.write_transaction(
-                    self._create_and_return_transactions, id_int.item(), idC, idT)
+                    self._create_and_return_transactions, id_int.item(), idC, idT, amount, date.date()) 
             
     @staticmethod
     def _create_and_return_customers(tx, person1_name):
@@ -48,32 +55,32 @@ class App:
         tx.run(query, terminal=terminal)
 
     @staticmethod
-    def _create_and_return_transactions(tx, id, idC, idT):
+    def _create_and_return_transactions(tx, id, idC, idT, amount, date):
         query = (
             "MATCH (c:Customer {name: $idC})"
             "MATCH (tr:Terminal {name: $idT})"
-            "CREATE (t:Transaction { name: $id }) "
+            "CREATE (t:Transaction { name: $id, amount: $amount, date: $date }) "
             "CREATE (t)<-[:make]-(c) "
             "CREATE (tr)-[:from]->(t) "
             "RETURN t"
         )
-        tx.run(query, id=id, idC=idC, idT=idT)
+        tx.run(query, id=id, idC=idC, idT=idT, amount=amount, date=date)
 
-    def find_person(self, person_name):
+    def find_person(self, month):
         with self.driver.session() as session:
-            result = session.read_transaction(self._find_and_return_person, person_name)
+            result = session.read_transaction(self._find_and_return_person, month)
             for row in result:
-                print("Found person: {row}".format(row=row))
+                print("Found person: ", row)
 
     @staticmethod
-    def _find_and_return_person(tx, person_name):
+    def _find_and_return_person(tx, month):
         query = (
-            "MATCH (p:Person) "
-            "WHERE p.name = $person_name "
-            "RETURN p.name AS name"
+            "MATCH (c:Customer)-[:make]->(t:Transaction)"
+            "WHERE datetime({date:t.date}) >= datetime('2022-1-1') and datetime({date:t.date}) <= datetime('2022-1-31')"
+            "RETURN c.name, t.date, sum(t.amount)"
         )
-        result = tx.run(query, person_name=person_name)
-        return [row["name"] for row in result]
+        result = tx.run(query, month=month)
+        return [row for row in result]
 
     def delete_all(self):
         with self.driver.session() as session:
@@ -90,11 +97,16 @@ class App:
 if __name__ == "__main__":
     generate_all()
     (customer, terminal, transaction) = get_dataset()
-    uri = "neo4j+s://300d5335.databases.neo4j.io"
+    uri = "neo4j+s://3de7d37f.databases.neo4j.io"
+    #uri = "neo4j+s://858239b5.databases.neo4j.io"
+    #uri = "bolt://localhost:7687"
     user = "neo4j"
-    password = "dwbybX86j40mk62hG2Jv4jWDH7zn4FVHO5AdyL7lbj4"
+    password = "mY_MhdHFA1Y6ot2nAgYF6SLEZ5FuB7B1iMVPOC5YMnA"
+    #password = "9-GTN-UU2SCO75wnczqxYZiC-GUsUBc1Jv5hCyA3KZA"
     app = App(uri, user, password)
     
-    app.delete_all()
-    app.create_all(customer, terminal, transaction)
+    #app.delete_all()
+    #app.create_all(customer, terminal, transaction)
+    
+    app.find_person(2)
     app.close()
