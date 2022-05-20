@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from re import A
 from time import strftime
 import neo4j
 from pytest import PytestCollectionWarning
@@ -8,6 +9,7 @@ from neo4j import GraphDatabase
 import logging
 from neo4j.exceptions import ServiceUnavailable
 import numpy as np
+from collections import defaultdict
 
 class App:
     def __init__(self, uri, user, password):
@@ -18,6 +20,7 @@ class App:
             
     
     def create_all(self, customers, terminals, transactions):
+        customer_dict = {}
         with self.driver.session() as session:
             for row in customers.CUSTOMER_ID: 
                 session.write_transaction(
@@ -37,7 +40,17 @@ class App:
                 
                 session.write_transaction(
                     self._create_and_return_transactions, id_int.item(), idC, idT, amount, date.date()) 
-            
+
+                if not idC in customer_dict:
+                    customer_dict[idC] = [idT]
+                else:
+                    if not idT in customer_dict[idC]:
+                        customer_dict[idC].append(idT)
+
+            session.write_transaction(
+                    self._create_tmp, customer_dict) 
+
+
     @staticmethod
     def _create_and_return_customers(tx, person1_name):
         query = (
@@ -57,14 +70,24 @@ class App:
     @staticmethod
     def _create_and_return_transactions(tx, id, idC, idT, amount, date):
         query = (
-            "MATCH (c:Customer {name: $idC})"
-            "MATCH (tr:Terminal {name: $idT})"
+            "MATCH (c:Customer {name: $idC}) MATCH (tr:Terminal {name: $idT})"
             "CREATE (t:Transaction { name: $id, amount: $amount, date: $date }) "
             "CREATE (t)<-[:make]-(c) "
             "CREATE (tr)-[:from]->(t) "
             "RETURN t"
         )
         tx.run(query, id=id, idC=idC, idT=idT, amount=amount, date=date)
+
+    @staticmethod
+    def _create_tmp(tx, dict):
+        for key, value in dict.items():
+            for item in value:
+                query = (
+                    "match (c:Customer {name: $key}) MATCH (tr:Terminal {name: $item})"
+                    "CREATE (c)-[:connect]->(tr) "
+                    "RETURN tr"
+                )
+                tx.run(query, key=key, item=item)
 
     def amount_customer(self, month):
         with self.driver.session() as session:
@@ -120,9 +143,32 @@ if __name__ == "__main__":
     password = "9-GTN-UU2SCO75wnczqxYZiC-GUsUBc1Jv5hCyA3KZA"
     app = App(uri, user, password)
     
-    #app.delete_all()
-    #app.create_all(customer, terminal, transaction)
+    app.delete_all()
+    app.create_all(customer, terminal, transaction)
     
     #app.amount_customer(2)
-    app.fraudolent_transactions()
+    #app.fraudolent_transactions()
     app.close()
+
+
+"""
+u = a b c c
+u1 = a c d
+u2 = c b g
+
+u -> a -> u1 -> c -> u2
+u -> a -> u1 -> d
+u -> b -> u2 -> c -> u1
+u -> b 
+u -> c
+
+
+customer
+
+terminal
+
+transaction
+
+
+"""
+
