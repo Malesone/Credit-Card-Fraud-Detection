@@ -134,12 +134,8 @@ class App:
 if __name__ == "__main__":
     generate_all()
     (customer, terminal, transaction) = get_dataset()
-    #uri = "neo4j+s://3de7d37f.databases.neo4j.io"
     uri = "neo4j+s://858239b5.databases.neo4j.io"
-    #uri = "bolt://localhost:7687"
     user = "neo4j"
-    #password = "mY_MhdHFA1Y6ot2nAgYF6SLEZ5FuB7B1iMVPOC5YMnA"
-    #password = "neo4j"
     password = "9-GTN-UU2SCO75wnczqxYZiC-GUsUBc1Jv5hCyA3KZA"
     app = App(uri, user, password)
     
@@ -149,26 +145,4 @@ if __name__ == "__main__":
     #app.amount_customer(2)
     #app.fraudolent_transactions()
     app.close()
-
-
-"""
-u = a b c c
-u1 = a c d
-u2 = c b g
-
-u -> a -> u1 -> c -> u2
-u -> a -> u1 -> d
-u -> b -> u2 -> c -> u1
-u -> b 
-u -> c
-
-
-customer
-
-terminal
-
-transaction
-
-
-"""
 

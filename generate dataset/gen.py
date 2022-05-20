@@ -183,9 +183,8 @@ class Dataset:
 
 d = Dataset()
 def generate_all():
-    dataset = d.generate_dataset(10, 50, 10, "2022-01-01", 5)
-    #import sys
-    #print(sys.getsizeof(dataset))
+    #dataset = d.generate_dataset(20, 50, 10, "2022-01-01", 18)
+    dataset = d.generate_dataset(10, 50, 10, "2022-01-01", 10)
     save_all()
     deserializate()
 
