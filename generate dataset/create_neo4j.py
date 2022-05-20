@@ -37,8 +37,8 @@ class App:
                 idT = transactions.iloc[row].TERMINAL_ID
                 amount = transaction.iloc[row].TX_AMOUNT
                 date = transaction.iloc[row].TX_DATETIME #pandas._libs.tslibs.timestamps.Timestamp
-                product = transaction.iloc[row].PRODUCT
-
+                product = np.str0(transaction.iloc[row].PRODUCT)
+                
                 session.write_transaction(
                     self._create_and_return_transactions, id_int.item(), idC, idT, amount, date.date(), product) 
 
