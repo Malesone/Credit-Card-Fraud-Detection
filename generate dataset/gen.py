@@ -85,11 +85,11 @@ class Dataset:
     def generate_dataset(self, n_customers, n_terminals, nb_days, start_date, r):
         start_time=time.time()
         customer_profiles_table = generate_customer_profiles_table(n_customers, random_state = 0)
-        print("Time to generate customer profiles table: {0:.2}s".format(time.time()-start_time))
+        #print("Time to generate customer profiles table: {0:.2}s".format(time.time()-start_time))
         
         start_time=time.time()
         terminal_profiles_table = generate_terminal_profiles_table(n_terminals, random_state = 1)
-        print("Time to generate terminal profiles table: {0:.2}s".format(time.time()-start_time))
+        #print("Time to generate terminal profiles table: {0:.2}s".format(time.time()-start_time))
         
         start_time=time.time()
         x_y_terminals = terminal_profiles_table[['x_terminal_id','y_terminal_id']].values.astype(float)
@@ -97,13 +97,13 @@ class Dataset:
         # With Pandarallel
         #customer_profiles_table['available_terminals'] = customer_profiles_table.parallel_apply(lambda x : get_list_closest_terminals(x, x_y_terminals=x_y_terminals, r=r), axis=1)
         customer_profiles_table['nb_terminals']=customer_profiles_table.available_terminals.apply(len)
-        print("Time to associate terminals to customers: {0:.2}s".format(time.time()-start_time))
+        #print("Time to associate terminals to customers: {0:.2}s".format(time.time()-start_time))
         
         start_time=time.time()
         transactions_df=customer_profiles_table.groupby('CUSTOMER_ID').apply(lambda x : generate_transactions_table(x.iloc[0], nb_days=nb_days)).reset_index(drop=True)
         # With Pandarallel
         #transactions_df=customer_profiles_table.groupby('CUSTOMER_ID').parallel_apply(lambda x : generate_transactions_table(x.iloc[0], nb_days=nb_days)).reset_index(drop=True)
-        print("Time to generate transactions: {0:.2}s".format(time.time()-start_time))
+        #print("Time to generate transactions: {0:.2}s".format(time.time()-start_time))
         
         # Sort transactions chronologically
         transactions_df=transactions_df.sort_values('TX_DATETIME')

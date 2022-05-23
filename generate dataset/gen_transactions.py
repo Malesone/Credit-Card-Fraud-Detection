@@ -11,7 +11,7 @@ class Moment(Enum):
     night = "night"
 
 def generate_transactions_table(customer_profile, start_date = "2022-01-01", nb_days = 10):
-    product = ["high-tech", "food", "clothing", "consumable", "other"]
+    product = ['high-tech', 'food', 'clothing', 'consumable', 'other']
     customer_transactions = []
     
     random.seed(int(customer_profile.CUSTOMER_ID))
