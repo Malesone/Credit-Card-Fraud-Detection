@@ -38,9 +38,10 @@ class App:
                 amount = transaction.iloc[row].TX_AMOUNT
                 date = transaction.iloc[row].TX_DATETIME #pandas._libs.tslibs.timestamps.Timestamp
                 product = np.str0(transaction.iloc[row].PRODUCT)
-                
+                moment = transaction.iloc[row].MOMENT
+
                 session.write_transaction(
-                    self._create_and_return_transactions, id_int.item(), idC, idT, amount, date.date(), product) 
+                    self._create_and_return_transactions, id_int.item(), idC, idT, amount, date.date(), moment, product) 
 
                 if not idC in customer_dict:
                     customer_dict[idC] = [idT]
@@ -69,15 +70,15 @@ class App:
         tx.run(query, terminal=terminal)
 
     @staticmethod
-    def _create_and_return_transactions(tx, id, idC, idT, amount, date, product):
+    def _create_and_return_transactions(tx, id, idC, idT, amount, date, moment, product):
         query = (
             "MATCH (c:Customer {name: $idC}) MATCH (tr:Terminal {name: $idT})"
-            "CREATE (t:Transaction { name: $id, amount: $amount, date: $date, product: $product }) "
+            "CREATE (t:Transaction { name: $id, amount: $amount, date: $date, moment: $moment, product: $product }) "
             "CREATE (t)<-[:make]-(c) "
             "CREATE (tr)-[:from]->(t) "
             "RETURN t"
         )
-        tx.run(query, id=id, idC=idC, idT=idT, amount=amount, date=date, product=product)
+        tx.run(query, id=id, idC=idC, idT=idT, amount=amount, date=date, moment=moment, product=product)
 
     @staticmethod
     def _create_connection_customer_terminal(tx, dict):
