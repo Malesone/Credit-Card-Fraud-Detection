@@ -183,8 +183,8 @@ class Dataset:
 
 d = Dataset()
 def generate_all():
-    #dataset = d.generate_dataset(20, 50, 10, "2022-01-01", 18)
-    dataset = d.generate_dataset(30, 60, 20, "2022-01-01", 15)
+    dataset = d.generate_dataset(20, 50, 10, "2022-01-01", 18)
+    #dataset = d.generate_dataset(30, 60, 20, "2022-01-01", 15)
     save_all()
     deserializate()
 
