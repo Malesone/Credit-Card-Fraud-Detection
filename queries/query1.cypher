@@ -28,13 +28,27 @@ create (c)-[:buying_friends]->(c1)
 return c, c1
 
 
-ottengo il conteggio di tutti i tipi di prodotti di un customer
-match (t:Transaction)<-[:make]-(c:Customer)-[:make]->(t1:Transaction)
-where t.product = t1.product and c.name = 11
-return c, count(t1.product), t1.product
+match (c: Customer)-[:make]->(tr: Transaction)<-[f:from]-(t: Terminal)
+with count(tr) as ttr, c, t, t.name as name, tr.product as p
+where ttr > 2
+call{
+    with name, c
+    match (c1: Customer)-[:make]->(tr1: Transaction)<-[:from]-(t1: Terminal {name: name})
+    with count(tr1) as ttr1, c1, t1, tr1.product as p1, c
+    where ttr1 > 2 and c<>c1
+    merge (c)-[:buying_friends]-(c1)
+    return c1
+}
+return c1
 
-MATCH (c: Customer)-[m:make]->(tr: Transaction)<-[f:from]-(t: Terminal)
-MATCH (c1: Customer)-[m1:make]->(tr1: Transaction)<-[f1:from]-(t1: Terminal)
-with count(m) as make, tr.product as product, c, t, count(m1) as make1, tr1.product as product1, c1, t1
-where make > 2 and product = product1 and make1 > 2 and t=t1 and c<>c1
-MERGE (c)-[:friends]->(c1)
+5. 
+call{
+match (t: Transaction)
+with t.moment as moment, count(t) as transactions
+return moment, transactions
+}
+match (t:Transaction {moment: moment})
+with avg(t.amount) as avg_amount, date.truncate('month', t.date) as month, moment, transactions
+match (t1:Transaction {moment: moment})
+where t1.amount > avg_amount/2 and date.truncate('month', t1.date) = month 
+return moment, transactions, count(t1) as fraudolent
