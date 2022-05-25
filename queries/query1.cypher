@@ -43,12 +43,12 @@ return c1
 
 5. 
 call{
-match (t: Transaction)
-with t.moment as moment, count(t) as transactions
-return moment, transactions
+    match (t: Transaction)
+    with t.moment as moment, count(t) as transactions
+    return moment, transactions
 }
-match (t:Transaction {moment: moment})
-with avg(t.amount) as avg_amount, date.truncate('month', t.date) as month, moment, transactions
-match (t1:Transaction {moment: moment})
-where t1.amount > avg_amount/2 and date.truncate('month', t1.date) = month 
-return moment, transactions, count(t1) as fraudolent
+match (t:Transaction)<-[:from]-(tr:Terminal) 
+with tr.name as name, avg(t.amount) as avg_amount, date.truncate('month', t.date) as month, transactions, moment
+match (trr:Terminal)-[:from]->(t1:Transaction {moment: moment})
+where t1.amount > avg_amount/2 and date.truncate('month', t1.date) = month and trr.name = name 
+return moment, transactions, count(t1)
