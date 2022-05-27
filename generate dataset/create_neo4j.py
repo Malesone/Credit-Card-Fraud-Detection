@@ -143,9 +143,11 @@ if __name__ == "__main__":
     print("Time to generate customer profiles table: {0:.2}s".format(tmp))
 
     (customer, terminal, transaction) = get_dataset()
-    uri = "neo4j+s://858239b5.databases.neo4j.io"
+    #uri = "neo4j+s://858239b5.databases.neo4j.io"
+    uri = "bolt://localhost:7687"
     user = "neo4j"
-    password = "9-GTN-UU2SCO75wnczqxYZiC-GUsUBc1Jv5hCyA3KZA"
+    password = "test"
+    #password = "9-GTN-UU2SCO75wnczqxYZiC-GUsUBc1Jv5hCyA3KZA"
     app = App(uri, user, password)
     
     app.delete_all()

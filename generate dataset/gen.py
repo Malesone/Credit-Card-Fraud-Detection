@@ -184,7 +184,8 @@ class Dataset:
 d = Dataset()
 def generate_all():
     #dataset = d.generate_dataset(20, 50, 10, "2022-01-01", 18)
-    dataset = d.generate_dataset(2500, 5000, 181, "2022-01-01", 5)
+    #dataset = d.generate_dataset(2500, 5000, 181, "2022-01-01", 5)
+    dataset = d.generate_dataset(20, 50, 10, "2022-01-01", 18)
     #save_all()
     #deserializate()
 
