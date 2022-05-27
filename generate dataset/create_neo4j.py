@@ -10,6 +10,7 @@ import logging
 from neo4j.exceptions import ServiceUnavailable
 import numpy as np
 from collections import defaultdict
+import time
 
 class App:
     def __init__(self, uri, user, password):
@@ -17,8 +18,7 @@ class App:
 
     def close(self):
         self.driver.close()
-            
-    
+             
     def create_all(self, customers, terminals, transactions):
         customer_dict = {}
         with self.driver.session() as session:
@@ -51,7 +51,7 @@ class App:
 
             session.write_transaction(
                     self._create_connection_customer_terminal, customer_dict) 
-
+        
 
     @staticmethod
     def _create_and_return_customers(tx, person1_name):
@@ -71,12 +71,15 @@ class App:
 
     @staticmethod
     def _create_and_return_transactions(tx, id, idC, idT, amount, date, moment, product):
+        
         query = (
+            #"CALL apoc.periodic.iterate(" 
             "MATCH (c:Customer {name: $idC}) MATCH (tr:Terminal {name: $idT})"
             "CREATE (t:Transaction { name: $id, amount: $amount, date: $date, moment: $moment, product: $product }) "
             "CREATE (t)<-[:make]-(c) "
             "CREATE (tr)-[:from]->(t) "
             "RETURN t"
+            #"{batchSize:1000, parallel:true})"
         )
         tx.run(query, id=id, idC=idC, idT=idT, amount=amount, date=date, moment=moment, product=product)
 
@@ -134,7 +137,11 @@ class App:
         tx.run(query)
 
 if __name__ == "__main__":
+    start_time=time.time()
     generate_all()
+    tmp = time.time()-start_time
+    print("Time to generate customer profiles table: {0:.2}s".format(tmp))
+
     (customer, terminal, transaction) = get_dataset()
     uri = "neo4j+s://858239b5.databases.neo4j.io"
     user = "neo4j"
@@ -147,4 +154,4 @@ if __name__ == "__main__":
     #app.amount_customer(2)
     #app.fraudolent_transactions()
     app.close()
-
+    

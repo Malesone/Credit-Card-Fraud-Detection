@@ -83,15 +83,15 @@ class Dataset:
     x: Any
      
     def generate_dataset(self, n_customers, n_terminals, nb_days, start_date, r):
-        start_time=time.time()
+        #start_time=time.time()
         customer_profiles_table = generate_customer_profiles_table(n_customers, random_state = 0)
         #print("Time to generate customer profiles table: {0:.2}s".format(time.time()-start_time))
         
-        start_time=time.time()
+        #start_time=time.time()
         terminal_profiles_table = generate_terminal_profiles_table(n_terminals, random_state = 1)
         #print("Time to generate terminal profiles table: {0:.2}s".format(time.time()-start_time))
         
-        start_time=time.time()
+        #start_time=time.time()
         x_y_terminals = terminal_profiles_table[['x_terminal_id','y_terminal_id']].values.astype(float)
         customer_profiles_table['available_terminals'] = customer_profiles_table.apply(lambda x : get_list_terminals_within_radius(x, x_y_terminals=x_y_terminals, r=r), axis=1)
         # With Pandarallel
@@ -99,7 +99,7 @@ class Dataset:
         customer_profiles_table['nb_terminals']=customer_profiles_table.available_terminals.apply(len)
         #print("Time to associate terminals to customers: {0:.2}s".format(time.time()-start_time))
         
-        start_time=time.time()
+        #start_time=time.time()
         transactions_df=customer_profiles_table.groupby('CUSTOMER_ID').apply(lambda x : generate_transactions_table(x.iloc[0], nb_days=nb_days)).reset_index(drop=True)
         # With Pandarallel
         #transactions_df=customer_profiles_table.groupby('CUSTOMER_ID').parallel_apply(lambda x : generate_transactions_table(x.iloc[0], nb_days=nb_days)).reset_index(drop=True)
@@ -112,12 +112,12 @@ class Dataset:
         transactions_df.reset_index(inplace=True)
         # TRANSACTION_ID are the dataframe indices, starting from 0
         transactions_df.rename(columns = {'index':'TRANSACTION_ID'}, inplace = True)
-
+        
         self.customer_profiles_table = customer_profiles_table
         self.terminal_profiles_table = terminal_profiles_table
         self.transactions_df = transactions_df
 
-        return (customer_profiles_table, terminal_profiles_table, transactions_df)
+        #return (customer_profiles_table, terminal_profiles_table, transactions_df)
         
     def add_frauds(self, customer_profiles_table, terminal_profiles_table, transactions_df):
         # By default, all transactions are genuine
@@ -183,10 +183,10 @@ class Dataset:
 
 d = Dataset()
 def generate_all():
-    dataset = d.generate_dataset(20, 50, 10, "2022-01-01", 18)
-    #dataset = d.generate_dataset(30, 60, 20, "2022-01-01", 15)
-    save_all()
-    deserializate()
+    #dataset = d.generate_dataset(20, 50, 10, "2022-01-01", 18)
+    dataset = d.generate_dataset(2500, 5000, 181, "2022-01-01", 5)
+    #save_all()
+    #deserializate()
 
 def get_dataset():
     return (d.customer_profiles_table, d.terminal_profiles_table, d.transactions_df)
