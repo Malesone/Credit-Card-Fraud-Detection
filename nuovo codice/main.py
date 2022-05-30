@@ -5,8 +5,7 @@ from app import App
 if __name__ == "__main__":
     start_time=time.time()
     d = Dataset()
-    #250, 500, 18, "2022-01-01", 5
-    d.generate_dataset(n_customers = 2500, n_terminals = 5000, nb_days = 18, radius = 5) 
+    d.generate_dataset(n_customers = 2500, n_terminals = 500, nb_days = 18, radius = 5) 
     tmp = time.time()-start_time
     print("Generazione: {0:.2}s".format(tmp))
     
@@ -25,7 +24,4 @@ if __name__ == "__main__":
     app.close()
     tmp = time.time()-start_time
     print("Caricamento: {0:.2}s".format(tmp))
-    
-    #for stat in d.statistics:
-    #    print(stat.get_string())
     

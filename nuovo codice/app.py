@@ -31,7 +31,7 @@ class App:
             print("Terminal nodes created")
   
             arrayTransactions = transactions.to_numpy()
-            arrayT = [[val[2], val[3], [val[0], "date(" +val[1].date().strftime('%Y-%m-%d')+")", val[4], val[7], val[8]]] for val in arrayTransactions]
+            arrayT = [[val[2], val[3], [val[0], val[1].date().strftime('%Y-%m-%d'), val[4], val[7], val[8]]] for val in arrayTransactions]
             
             connections = {}
             for val in arrayT:
@@ -112,7 +112,7 @@ class App:
         "MATCH (c:Customer {name: cn}), (t:Terminal {name: tn}) "
         "UNWIND tr as value "
         "WITH value[0] as id, value[1] as date, value[2] as amount, value[3] as moment, value[4] as product, c, t "
-        "CREATE (c)-[u:Transaction {id: id, date: date, amount: amount, moment: moment, product: product}]->(t) "   
+        "CREATE (c)-[u:Transaction {id: id, date: date(date), amount: amount, moment: moment, product: product}]->(t) " 
       )
       tx.run(query)
 
