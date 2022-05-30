@@ -136,6 +136,7 @@ class Dataset:
         # TRANSACTION_ID are the dataframe indices, starting from 0
         transactions_df.rename(columns = {'index':'TRANSACTION_ID'}, inplace = True)
 
+        self.transactions.dataset = transactions_df
         stat.stop_time()
         self.statistics.append(stat)
 
