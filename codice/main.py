@@ -10,8 +10,8 @@ if __name__ == "__main__":
     tmp = time.time()-start_time
     print("Generazione: {0:.2}s".format(tmp))
     
-    d.to_pickle()
-    d.deserializate()
+    #d.to_pickle()
+    #d.deserializate()
 
     start_time=time.time()
     uri = "bolt://localhost:7687"
