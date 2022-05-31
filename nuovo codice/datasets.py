@@ -51,6 +51,9 @@ class Dataset:
 
         self.gen_transaction(nb_days, radius)
 
+        self.calculate_amounts()
+        
+
     def add_frauds(self, customer_profiles_table, terminal_profiles_table, transactions_df):
         # By default, all transactions are genuine
         transactions_df['TX_FRAUD']=0
@@ -126,7 +129,6 @@ class Dataset:
 
         stat = Statistic(type = Operation.customers)
         transactions_df=self.customers.dataset.groupby('CUSTOMER_ID').apply(lambda x : self.transactions.generate_transactions_table(x.iloc[0], nb_days=nb_days)).reset_index(drop=True)
-        
 
         # Sort transactions chronologically
         transactions_df=transactions_df.sort_values('TX_DATETIME')
@@ -153,9 +155,11 @@ class Dataset:
 
         save_customers = time.time()
         self.customers.dataset.to_pickle(self.DIR_PKL+"customers.pkl", protocol=4)
-        #print("save CUSTOMER: {0:.2}s".format(time.time()-save_customers))   
         
-        self.terminals.dataset.to_pickle(self.DIR_PKL+"terminal.pkl", protocol=4)
+        self.terminals.dataset.to_pickle(self.DIR_PKL+"terminals.pkl", protocol=4)
+
+        self.transactions.dataset.to_pickle(self.DIR_PKL+"transactions.pkl", protocol=4)
+
         
     def deserializate(self): 
         deserializate = time.time()
@@ -182,3 +186,10 @@ class Dataset:
                 nome = self.DIR_CSV+entry.replace(".pkl", ".csv")
                 df = pd.DataFrame(data)
                 df.to_csv(nome, index=False)
+
+    def calculate_amounts(self):
+        sum = []
+        for id in self.customers.dataset['CUSTOMER_ID']:
+            sum.append(self.transactions.dataset[self.transactions.dataset['CUSTOMER_ID']==id]['TX_AMOUNT'].sum())
+            
+        self.customers.dataset['AMOUNT'] = sum  
