@@ -3,6 +3,7 @@ from re import A
 from time import strftime
 import neo4j
 from sqlalchemy import Date
+from gen import generate_all, get_dataset
 from neo4j import GraphDatabase
 import logging
 from neo4j.exceptions import ServiceUnavailable
@@ -21,8 +22,8 @@ class App:
     def create_all(self, customers, terminals, transactions):
         customer_dict = {}
         with self.driver.session() as session:
-            arrayC = customers['CUSTOMER_ID'].to_numpy().astype(int)
-            arrayT = terminals['TERMINAL_ID'].to_numpy().astype(int)
+            arrayC = customers.to_numpy()
+            arrayT = terminals.to_numpy()
 
             
             session.write_transaction(self._create_and_return_customers, arrayC)
@@ -31,6 +32,7 @@ class App:
             print("Terminal nodes created")
   
             arrayTransactions = transactions.to_numpy()
+            print(len(arrayTransactions))
             arrayT = [[val[2], val[3], [val[0], val[1].date().strftime('%Y-%m-%d'), val[4], val[7], val[8]]] for val in arrayTransactions]
             
             connections = {}
@@ -45,61 +47,44 @@ class App:
               v = ast.literal_eval(key)
               arrayT.append([v[0], v[1], value])
 
-            
-
             at_split = [arrayT]
-            t = 2000
+            t = 1000
             while len (at_split [-1]) >= 2 * t:
               at_split [-1:] = [at_split [-1][:t], at_split [-1][t:]]
  
             
             for chunk in at_split:
               session.write_transaction(self._create_and_return_transactions, str(chunk))
+  
 
     @staticmethod
     def _create_and_return_customers(tx, array):
-        arrayString = "["
-        for value in array:
-          arrayString += str(value)
-          arrayString += ","
-
-        arrayString = arrayString[0:len(arrayString)-1]
-        arrayString += "]"
-        print(arrayString)
-        query = (
-            "WITH " + arrayString + " AS array "
+      arrayC = [[val[0], val[1], val[2]] for val in array]
+      arrayC = str(arrayC)
+      query = (
+            "WITH " + arrayC + " AS array "
             "UNWIND array as value "
-            "CREATE (:Customer {name: value}) "
-        )
+            "WITH value[0] as id, value[1] as lng, value[2] as lat " 
+            "CREATE (:Customer {id: id, lng: lng, lat: lat}) "
+      )
 
-        tx.run(query)
+      tx.run(query)
 
    
-
-   
-    def _chunks (self, l, n):
-      r = [l]
-      while len (r [-1]) >= 2 * n:
-        r [-1:] = [r [-1][:n], r [-1][n:]]
-      return r
 
     @staticmethod
     def _create_and_return_terminals(tx, array):
-        arrayString = "["
-        for value in array:
-          arrayString += str(value)
-          arrayString += ","
-
-        arrayString = arrayString[0:len(arrayString)-1]
-        arrayString += "]"
-        query = (
-            "WITH " + arrayString + " AS array "
+      arrayTr = [[val[0], val[1], val[2]] for val in array]
+      arrayTr = str(arrayTr)
+      query = (
+            "WITH " + arrayTr + " AS array "
             "UNWIND array as value "
-            "CREATE (:Terminal {name: value}) "    
-        )
+            "WITH value[0] as id, value[1] as lng, value[2] as lat " 
+            "CREATE (:Terminal {id: id, lng: lng, lat: lat}) "
+      )
 
-
-        tx.run(query)
+      tx.run(query)
+      
 
 
     @staticmethod
@@ -109,10 +94,10 @@ class App:
         "WITH " + array +" AS array "
         "UNWIND array as unw "
         "WITH unw[0] as cn, unw[1] as tn, unw[2] as tr "
-        "MATCH (c:Customer {name: cn}), (t:Terminal {name: tn}) "
+        "MATCH (c:Customer {id: cn}), (t:Terminal {id: tn}) "
         "UNWIND tr as value "
         "WITH value[0] as id, value[1] as date, value[2] as amount, value[3] as moment, value[4] as product, c, t "
-        "CREATE (c)-[u:Transaction {id: id, date: date(date), amount: amount, moment: moment, product: product}]->(t) " 
+        "CREATE (c)-[u:Transaction {id: id, date: date(date), amount: amount, moment: moment, product: product}]->(t) "   
       )
       tx.run(query)
 
