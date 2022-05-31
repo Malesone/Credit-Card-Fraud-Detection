@@ -54,6 +54,10 @@ class App:
             for chunk in at_split:
               session.write_transaction(self._create_and_return_transactions, str(chunk))
   
+            start_time=time.time()
+            print(session.write_transaction(self._return_cocustomer, 1, 5))
+            tmp = time.time()-start_time
+            print("query 3 tempo: {0:.2}s".format(tmp))
 
     @staticmethod
     def _create_and_return_customers(tx, array):
@@ -139,6 +143,56 @@ class App:
         )
         result = tx.run(query)
         return [row for row in result]
+
+    @staticmethod
+    def _return_cocustomer(tx, id, n):
+      cCollected = "[]"
+      tCollected = "[]"
+      p = "[]"
+
+      if (n == 0):
+        return cCollected
+
+      
+      query = (
+            """
+            match(c:Customer {id: """ + str(id) + """})-[]->(t)
+            with collect(DISTINCT t.id) AS tCollected, collect(DISTINCT c.id) as preC
+
+            UNWIND tCollected as tCol
+            match (t: Terminal {id: tCol})-[]-(c:Customer)
+            where not c.id in preC
+            return collect(DISTINCT c.id) AS cCollected, tCollected, preC as p
+
+            """
+      )
+     
+      result = [row for row in tx.run(query)]
+      cCollected = str([el for el in result[0]][0])
+      tCollected = str([el for el in result[0]][1])
+      p = str([el for el in result[0]][2])
+   
+      for _ in range(1, n):
+        query = (
+            """
+            UNWIND """ + cCollected + """ AS col
+            match (c: Customer {id: col})-[]-(t)
+            WHERE NOT t.id IN """ + tCollected + """
+            with collect(DISTINCT t.id) AS tCollected, collect(DISTINCT c.id) + """ + p + """ as preC
+
+            UNWIND tCollected as tCol
+            match (t: Terminal {id: tCol})-[]-(c:Customer)
+            where not c.id in preC
+            RETURN collect(DISTINCT c.id) AS cCollected, tCollected, preC as p
+
+            """
+        )
+        result = [row for row in tx.run(query)]
+        cCollected = str([el for el in result[0]][0])
+        tCollected = str([el for el in result[0]][1])
+        p = str([el for el in result[0]][2])
+        
+      return cCollected
 
     def delete_all(self):
         with self.driver.session() as session:
