@@ -50,15 +50,12 @@ class Dataset:
 
         self.gen_transaction(nb_days, radius)
 
-        self.add_frauds()
+        self.transactions.dataset = self.add_frauds(self.customers.dataset, self.terminals.dataset, self.transactions.dataset)
         
         self.calculate_amounts()
 
-    def add_frauds(self):
-        transactions_df = self.transactions.dataset
-        terminal_profiles_table = self.terminals.dataset
-        customer_profiles_table = self.customers.dataset
-
+    def add_frauds(self, customer_profiles_table, terminal_profiles_table, transactions_df):
+        # By default, all transactions are genuine
         transactions_df['TX_FRAUD']=0
         transactions_df['TX_FRAUD_SCENARIO']=0
         
@@ -66,7 +63,7 @@ class Dataset:
         transactions_df.loc[transactions_df.TX_AMOUNT>220, 'TX_FRAUD']=1
         transactions_df.loc[transactions_df.TX_AMOUNT>220, 'TX_FRAUD_SCENARIO']=1
         nb_frauds_scenario_1=transactions_df.TX_FRAUD.sum()
-        #print("Number of frauds from scenario 1: "+str(nb_frauds_scenario_1))
+        print("Number of frauds from scenario 1: "+str(nb_frauds_scenario_1))
         
         # Scenario 2
         for day in range(transactions_df.TX_TIME_DAYS.max()):
@@ -81,7 +78,7 @@ class Dataset:
             transactions_df.loc[compromised_transactions.index,'TX_FRAUD_SCENARIO']=2
         
         nb_frauds_scenario_2=transactions_df.TX_FRAUD.sum()-nb_frauds_scenario_1
-        #print("Number of frauds from scenario 2: "+str(nb_frauds_scenario_2))
+        print("Number of frauds from scenario 2: "+str(nb_frauds_scenario_2))
         
         # Scenario 3
         for day in range(transactions_df.TX_TIME_DAYS.max()):
@@ -101,8 +98,12 @@ class Dataset:
             transactions_df.loc[index_fauds,'TX_AMOUNT']=transactions_df.loc[index_fauds,'TX_AMOUNT']*5
             transactions_df.loc[index_fauds,'TX_FRAUD']=1
             transactions_df.loc[index_fauds,'TX_FRAUD_SCENARIO']=3
-
-        self.transactions.dataset = transactions_df    
+            
+                                
+        nb_frauds_scenario_3=transactions_df.TX_FRAUD.sum()-nb_frauds_scenario_2-nb_frauds_scenario_1
+        print("Number of frauds from scenario 3: "+str(nb_frauds_scenario_3))
+        
+        return transactions_df                 
 
     def get_stats(self):
         #Number of transactions per day
