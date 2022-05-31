@@ -64,7 +64,6 @@ class App:
             "UNWIND array as value "
             "WITH value[0] as id, value[1] as lng, value[2] as lat, value[3] as totalAmount " 
             "CREATE (:Customer {id: id, lng: lng, lat: lat, totalAmount: totalAmount}) "
-            "WITH"
       )
 
       tx.run(query)
