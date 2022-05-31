@@ -10,10 +10,10 @@ if __name__ == "__main__":
     tmp = time.time()-start_time
     print("Generazione: {0:.2}s".format(tmp))
     
-    d.to_pickle()
-    d.deserializate()
+    #d.to_pickle()
+    #d.deserializate()
 
-    """start_time=time.time()
+    start_time=time.time()
     uri = "bolt://localhost:7687"
     user = "neo4j"
     password = "test"
@@ -26,4 +26,4 @@ if __name__ == "__main__":
     app.close()
     tmp = time.time()-start_time
     print("Caricamento: {0:.2}s".format(tmp))
-    """
+ 

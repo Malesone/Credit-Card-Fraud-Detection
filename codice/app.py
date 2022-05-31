@@ -57,13 +57,14 @@ class App:
 
     @staticmethod
     def _create_and_return_customers(tx, array):
-      arrayC = [[val[0], val[1], val[2]] for val in array]
+      arrayC = [[val[0], val[1], val[2], val[8]] for val in array]
       arrayC = str(arrayC)
       query = (
             "WITH " + arrayC + " AS array "
             "UNWIND array as value "
-            "WITH value[0] as id, value[1] as lng, value[2] as lat " 
-            "CREATE (:Customer {id: id, lng: lng, lat: lat}) "
+            "WITH value[0] as id, value[1] as lng, value[2] as lat, value[3] as totalAmount " 
+            "CREATE (:Customer {id: id, lng: lng, lat: lat, totalAmount: totalAmount}) "
+            "WITH"
       )
 
       tx.run(query)
