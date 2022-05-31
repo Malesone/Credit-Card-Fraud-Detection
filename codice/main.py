@@ -1,19 +1,15 @@
+import statistics
 from datasets import Dataset
 import time
 from app import App
+from datasets import Operation
+from statistics import Statistic
 
 if __name__ == "__main__":
-    start_time=time.time()
     d = Dataset()
     d.generate_dataset(n_customers = 50, n_terminals = 50, nb_days = 10, radius = 5) 
-    
-    tmp = time.time()-start_time
-    print("Generazione: {0:.2}s".format(tmp))
-    
-    #d.to_pickle()
-    #d.deserializate()
 
-    start_time=time.time()
+    upload = Statistic(type = Operation.terminals)
     uri = "bolt://localhost:7687"
     user = "neo4j"
     password = "test"
@@ -24,6 +20,9 @@ if __name__ == "__main__":
     app.create_all(d.customers.dataset, d.terminals.dataset, d.transactions.dataset)
     
     app.close()
-    tmp = time.time()-start_time
-    print("Caricamento: {0:.2}s".format(tmp))
+    upload.stop_time()
+    
+    for stat in d.statistics:
+        print(stat.get_string)
+    
     

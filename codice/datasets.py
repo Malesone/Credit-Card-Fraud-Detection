@@ -22,6 +22,7 @@ class Operation(Enum):
     customers = "generate customers"
     terminals = "generate terminals"
     transactions = "generate transactions"
+    generation = "datasets generation"
     deserialization = "deserialize"
 
 class Dataset: 
@@ -36,6 +37,7 @@ class Dataset:
     DIR_CSV = "./dataset_csv/"
 
     def generate_dataset(self, n_customers, n_terminals, nb_days, radius):
+        gen = Statistic(type = Operation.generation)
         stat = Statistic(type = Operation.customers)
         self.customers = Customer(n_customers)
         stat.stop_time()
@@ -53,6 +55,11 @@ class Dataset:
         self.transactions.dataset = self.add_frauds(self.customers.dataset, self.terminals.dataset, self.transactions.dataset)
         
         self.calculate_amounts()
+        self.to_pickle()
+        self.deserializate()
+
+        gen.stop_time()
+        self.statistics.append(gen)
 
     def add_frauds(self, customer_profiles_table, terminal_profiles_table, transactions_df):
         # By default, all transactions are genuine
