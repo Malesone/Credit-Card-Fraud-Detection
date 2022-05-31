@@ -24,6 +24,7 @@ class Operation(Enum):
     transactions = "generate transactions"
     generation = "datasets generation"
     deserialization = "deserialize"
+    save = "save"
 
 class Dataset: 
     customers: Customer
@@ -37,29 +38,29 @@ class Dataset:
     DIR_CSV = "./dataset_csv/"
 
     def generate_dataset(self, n_customers, n_terminals, nb_days, radius):
-        gen = Statistic(type = Operation.generation)
-        stat = Statistic(type = Operation.customers)
+        gen = Statistic(type = Operation.generation.value)
         self.customers = Customer(n_customers)
-        stat.stop_time()
-        self.statistics.append(stat)
         
-        stat = Statistic(type = Operation.terminals)
         self.terminals = Terminal(n_terminals)
-        stat.stop_time()
-        self.statistics.append(stat)
         
         self.transactions = Transaction()
-
         self.gen_transaction(nb_days, radius)
 
         self.transactions.dataset = self.add_frauds(self.customers.dataset, self.terminals.dataset, self.transactions.dataset)
         
         self.calculate_amounts()
-        self.to_pickle()
-        self.deserializate()
-
         gen.stop_time()
         self.statistics.append(gen)
+
+        save = Statistic(type = Operation.save.value)
+        self.to_pickle()
+        save.stop_time()
+        des = Statistic(type = Operation.deserialization.value)
+        self.deserializate()
+        des.stop_time()
+        self.statistics.append(save)
+        self.statistics.append(des)
+        
 
     def add_frauds(self, customer_profiles_table, terminal_profiles_table, transactions_df):
         # By default, all transactions are genuine
@@ -133,7 +134,6 @@ class Dataset:
         #setta quanti terminali sono disponibili per cliente
         self.customers.dataset['nb_terminals']=self.customers.dataset.available_terminals.apply(len)
 
-        stat = Statistic(type = Operation.customers)
         transactions_df=self.customers.dataset.groupby('CUSTOMER_ID').apply(lambda x : self.transactions.generate_transactions_table(x.iloc[0], nb_days=nb_days)).reset_index(drop=True)
 
         # Sort transactions chronologically
@@ -145,9 +145,7 @@ class Dataset:
         transactions_df.rename(columns = {'index':'TRANSACTION_ID'}, inplace = True)
 
         self.transactions.dataset = transactions_df
-        stat.stop_time()
-        self.statistics.append(stat)
-
+       
     def get_list_terminals_within_radius(self, customer_profile, x_y_terminals, r):
         x_y_customer = customer_profile[['x_customer_id','y_customer_id']].values.astype(float)
         squared_diff_x_y = np.square(x_y_customer - x_y_terminals)
