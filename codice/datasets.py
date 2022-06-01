@@ -53,15 +53,15 @@ class Dataset:
         self.statistics.append(gen)
 
         save = Statistic(type = Operation.save.value)
-        #self.to_pickle()
+        self.to_pickle()
         save.stop_time()
         des = Statistic(type = Operation.deserialization.value)
-        #self.deserializate()
+        self.deserializate()
         des.stop_time()
+
         self.statistics.append(save)
         self.statistics.append(des)
         
-
     def add_frauds(self, customer_profiles_table, terminal_profiles_table, transactions_df):
         # By default, all transactions are genuine
         transactions_df['TX_FRAUD']=0
@@ -156,18 +156,16 @@ class Dataset:
     def to_pickle(self): #salva tutti i dati generati sotto forma di .pkl
         if not os.path.exists(self.DIR_PKL):
             os.makedirs(self.DIR_PKL)
-
-        save_customers = time.time()
-        #self.customers.dataset.to_pickle(self.DIR_PKL+"customers.pkl", protocol=4)
         
-        #self.terminals.dataset.to_pickle(self.DIR_PKL+"terminals.pkl", protocol=4)
+        self.customers.dataset.to_pickle(self.DIR_PKL+"customers.pkl", protocol=4)
+        
+        self.terminals.dataset.to_pickle(self.DIR_PKL+"terminals.pkl", protocol=4)
 
-        #self.transactions.dataset.to_pickle(self.DIR_PKL+"transactions.pkl", protocol=4)
+        self.transactions.dataset.to_pickle(self.DIR_PKL+"transactions.pkl", protocol=4)
         
     def deserializate(self): 
-        deserializate = time.time()
         files = []
-
+        total_size = 0
         if not os.path.exists(self.DIR_CSV):
                 os.makedirs(self.DIR_CSV)
 
@@ -189,10 +187,14 @@ class Dataset:
                 nome = self.DIR_CSV+entry.replace(".pkl", ".csv")
                 df = pd.DataFrame(data)
                 df.to_csv(nome, index=False)
+                total_size += os.path.getsize(nome)
+
+        total_size /= 1024
+        print("Total dim: ", total_size, "MB")
 
     def calculate_amounts(self):
         sum = []
         for id in self.customers.dataset['CUSTOMER_ID']:
             sum.append(self.transactions.dataset[self.transactions.dataset['CUSTOMER_ID']==id]['TX_AMOUNT'].sum())
             
-        self.customers.dataset['AMOUNT'] = sum  
+        self.customers.dataset['AMOUNT'] = sum
