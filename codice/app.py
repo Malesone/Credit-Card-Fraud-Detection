@@ -31,7 +31,7 @@ class App:
   
             arrayTransactions = transactions.to_numpy()
             print(len(arrayTransactions))
-            arrayT = [[val[2], val[3], [val[0], val[1].date().strftime('%Y-%m-%d'), val[4], val[7], val[8], val[9]]] for val in arrayTransactions]
+            arrayT = [[val[2], val[3], [val[0], val[1].date().strftime('%Y-%m-%d'), val[4], val[7]]] for val in arrayTransactions]
             
             connections = {}
             for val in arrayT:
@@ -98,8 +98,8 @@ class App:
         "WITH unw[0] as cn, unw[1] as tn, unw[2] as tr "
         "MATCH (c:Customer {id: cn}), (t:Terminal {id: tn}) "
         "UNWIND tr as value "
-        "WITH value[0] as id, value[1] as date, value[2] as amount, value[3] as moment, value[4] as product, value[5] as fraud, c, t "
-        "CREATE (c)-[u:Transaction {id: id, date: date(date), amount: amount, moment: moment, product: product, fraud: fraud}]->(t) "   
+        "WITH value[0] as id, value[1] as date, value[2] as amount, value[3] as fraud, c, t "
+        "CREATE (c)-[u:Transaction {id: id, date: date(date), amount: amount, fraud: fraud}]->(t) "   
       )
       tx.run(query)
 

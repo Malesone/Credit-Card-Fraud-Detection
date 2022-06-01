@@ -35,14 +35,14 @@ class Transaction:
                         #evening = 17-22
                         #night = 22-6
                         
-                        if(time_tx>=21600 and time_tx<43200):
+                        """if(time_tx>=21600 and time_tx<43200):
                             moment = Moment.morning
                         elif(time_tx>=43200 and time_tx<61200):
                             moment = Moment.afternoon
                         elif(time_tx>=61200 and time_tx<79200):
                             moment = Moment.evening
                         else:
-                            moment = Moment.night
+                            moment = Moment.night"""
 
                         # Amount is drawn from a normal distribution  
                         amount = np.random.normal(customer_profile.mean_amount, customer_profile.std_amount)
@@ -59,13 +59,13 @@ class Transaction:
                         
                             customer_transactions.append([time_tx+day*86400, day,
                                                         customer_profile.CUSTOMER_ID, 
-                                                        terminal_id, amount, moment.value, random.choice(product)])
+                                                        terminal_id, amount])
                 
-        self.dataset = pd.DataFrame(customer_transactions, columns=['TX_TIME_SECONDS', 'TX_TIME_DAYS', 'CUSTOMER_ID', 'TERMINAL_ID', 'TX_AMOUNT', 'MOMENT', 'PRODUCT'])
+        self.dataset = pd.DataFrame(customer_transactions, columns=['TX_TIME_SECONDS', 'TX_TIME_DAYS', 'CUSTOMER_ID', 'TERMINAL_ID', 'TX_AMOUNT'])
         
         if len(self.dataset)>0:
             self.dataset['TX_DATETIME'] = pd.to_datetime(self.dataset["TX_TIME_SECONDS"], unit='s', origin=start_date)
-            self.dataset = self.dataset[['TX_DATETIME','CUSTOMER_ID', 'TERMINAL_ID', 'TX_AMOUNT','TX_TIME_SECONDS', 'TX_TIME_DAYS', 'MOMENT', 'PRODUCT']]
+            self.dataset = self.dataset[['TX_DATETIME','CUSTOMER_ID', 'TERMINAL_ID', 'TX_AMOUNT','TX_TIME_SECONDS', 'TX_TIME_DAYS']]
         
         self.gen_time = time.time()-self.gen_time
         

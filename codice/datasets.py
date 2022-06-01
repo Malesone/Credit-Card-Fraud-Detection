@@ -53,10 +53,10 @@ class Dataset:
         self.statistics.append(gen)
 
         save = Statistic(type = Operation.save.value)
-        self.to_pickle()
+        #self.to_pickle()
         save.stop_time()
         des = Statistic(type = Operation.deserialization.value)
-        self.deserializate()
+        #self.deserializate()
         des.stop_time()
         self.statistics.append(save)
         self.statistics.append(des)
@@ -158,11 +158,11 @@ class Dataset:
             os.makedirs(self.DIR_PKL)
 
         save_customers = time.time()
-        self.customers.dataset.to_pickle(self.DIR_PKL+"customers.pkl", protocol=4)
+        #self.customers.dataset.to_pickle(self.DIR_PKL+"customers.pkl", protocol=4)
         
-        self.terminals.dataset.to_pickle(self.DIR_PKL+"terminals.pkl", protocol=4)
+        #self.terminals.dataset.to_pickle(self.DIR_PKL+"terminals.pkl", protocol=4)
 
-        self.transactions.dataset.to_pickle(self.DIR_PKL+"transactions.pkl", protocol=4)
+        #self.transactions.dataset.to_pickle(self.DIR_PKL+"transactions.pkl", protocol=4)
         
     def deserializate(self): 
         deserializate = time.time()
