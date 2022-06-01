@@ -49,16 +49,10 @@ class App:
             t = 1000
             while len (at_split [-1]) >= 2 * t:
               at_split [-1:] = [at_split [-1][:t], at_split [-1][t:]]
- 
             
             for chunk in at_split:
               session.write_transaction(self._create_and_return_transactions, str(chunk))
   
-            start_time=time.time()
-            print(session.write_transaction(self._return_cocustomer, 1, 5))
-            tmp = time.time()-start_time
-            print("query 3 tempo: {0:.2}s".format(tmp))
-
     @staticmethod
     def _create_and_return_customers(tx, array):
       arrayC = [[val[0], val[1], val[2], val[8]] for val in array]
