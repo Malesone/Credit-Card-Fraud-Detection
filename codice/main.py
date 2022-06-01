@@ -4,7 +4,7 @@ import time
 from app import App
 from datasets import Operation
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     start_time=time.time()
     d = Dataset()
     d.generate_dataset(n_customers = 10, n_terminals = 10, nb_days = 10, radius = 5) 
