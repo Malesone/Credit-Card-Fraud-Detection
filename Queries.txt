@@ -1,0 +1,90 @@
+1. For each customer identifies the amount that he/she has spent for every day of the current
+month.
+
+MATCH (c:Customer)-[t:Transaction]->()
+WHERE datetime({date:t.date}) >= datetime('AAAA-MM-GG') and datetime({date:t.date}) <= datetime('AAAA-MM-GG')
+RETURN c.id, t.date, sum(t.amount)
+
+2. For each terminal identify the possible fraudulent Transactions. The fraudulent Transactions
+are those whose import is higher than 50% of the average import of the Transactions
+executed on the same terminal in the last month.
+
+match (tr:Terminal)<-[t:Transaction]-() 
+with tr.id as id, avg(t.amount) as avg_amount, date.truncate('month', t.date) as month
+match (trr:Terminal)<-[t1:Transaction]-()
+where t1.amount > avg_amount/2 and date.truncate('month', t1.date) = month and trr.id = id 
+return t1
+
+c. Given a user u, determine the “co-customer-relationships CC of degree k”. A user u’ is a co-customer of u if you can determine a chain “u1-t1-u2-t2-…tk-1-uk“ such that u1=u, uk=u’, and for each 1<=I,j<=k, ui <> uj, and t1,..tk-1 are the terminals on which a Transaction has been executed. Therefore, CCk(u)={u’| a chain exists between u and u’ of degree k}. Please, note that depending on the adopted model, the computation of CCk(u) could be quite complicated. Consider therefore at least the computation of CC3(u) (i.e. the co-costumer relationships of degree 3)
+
+match(c:Customer {id: 11})-[]->(t)
+with collect(DISTINCT t.id) AS tCollected, collect(DISTINCT c.id) as preC
+
+UNWIND tCollected as tCol
+match (t: Terminal {id: tCol})-[]-(c:Customer)
+where not c.id in preC
+with collect(DISTINCT c.id) AS cCollected, tCollected, preC as p
+
+UNWIND cCollected AS col
+match (c: Customer {id: col})-[]-(t)
+WHERE NOT t.id IN tCollected
+with collect(DISTINCT t.id) AS tCollected, collect(DISTINCT c.id) + p as preC
+
+UNWIND tCollected as tCol
+match (t: Terminal {id: tCol})-[]-(c:Customer)
+where not c.id in preC
+with collect(DISTINCT c.id) AS cCollected, tCollected, preC as p
+
+UNWIND cCollected AS col
+match (c: Customer {id: col})-[]-(t)
+WHERE NOT t.id IN tCollected
+with collect(DISTINCT t.id) AS tCollected, collect(DISTINCT c.id) + p as preC
+
+UNWIND tCollected as tCol
+match (t: Terminal {id: tCol})-[]-(c:Customer)
+where not c.id in preC
+with collect(DISTINCT c.id) AS cCollected, tCollected, preC as p
+
+return cCollected
+
+-------------------------------------------------------------------------------------------
+ESTENSIONE DOMINIO
+
+1. 2.
+match (c)-[t]-(tr)
+with ['morning','afternoon', 'evening', 'night'] as moments, ['high-tech','food', 'clothing', 'consumable', 'other'] AS products, t
+SET t.moment = CASE toInteger(rand() * 4)
+        WHEN 0 THEN moments[0]
+        WHEN 1 THEN moments[1]
+        WHEN 2 THEN moments[2]
+        WHEN 3 THEN moments[3]
+    END
+SET t.product = CASE toInteger(rand() * 5)
+        WHEN 0 THEN products[0]
+        WHEN 1 THEN products[1]
+        WHEN 2 THEN products[2]
+        WHEN 3 THEN products[3]
+        WHEN 4 THEN products[4]
+    END
+
+
+3.
+ match (c: Customer)-[tr: Transaction]->(t: Terminal)
+    with count(tr) as ttr, c , t, tr.product as p
+    where ttr > 2
+    WITH distinct(c) as distinctC, t, p
+    match (c1: Customer)-[tr: Transaction]->(t)
+    with count(tr) as ttr, c1, tr.product as p1, distinctC as cc, t as tt, p as pp
+    where ttr > 2 and cc<>c1
+    match (cc)-[]->()<-[]-(c1)
+    WHERE pp = p1
+    MERGE (cc)-[:buying_friends]->(c1)
+
+
+
+4.
+match ()-[t: Transaction]-()
+with t.moment as moment, count(t) as transactions, sum(t.fraud) as fraudTransaction
+return moment, transactions, fraudTransaction
+
+
