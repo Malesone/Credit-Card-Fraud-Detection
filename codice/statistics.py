@@ -14,4 +14,4 @@ class Statistic:
         self.time = time.time()-self.time
 
     def get_string(self):
-        return "Time to " + type + ": " + time
+        return "Time to " + str(self.type) + ": " + str(self.time)

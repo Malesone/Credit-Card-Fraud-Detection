@@ -5,7 +5,7 @@ from app import App
 if __name__ == "__main__":
     start_time=time.time()
     d = Dataset()
-    d.generate_dataset(n_customers = 1000, n_terminals = 800, nb_days = 15, radius = 10) 
+    d.generate_dataset(n_customers = 800, n_terminals = 800, nb_days = 1, radius = 10) 
     
     tmp = time.time()-start_time
     print("Generazione: {0:.2}s".format(tmp))
