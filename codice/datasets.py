@@ -52,7 +52,6 @@ class Dataset:
         self.statistics.append(gen)
 
         self.save_all()
-        self.gen_plot()
 
     def save_all(self):
         save = Statistic(type = Operation.save.value)

@@ -9,7 +9,7 @@ if __name__ == "__main__":
     d = Dataset()
     d.generate_dataset(n_customers = 10, n_terminals = 10, nb_days = 10, radius = 5) 
 
-    """load = Statistic(type = Operation.generation.value)
+    load = Statistic(type = Operation.generation.value)
     uri = "bolt://localhost:7687"
     user = "neo4j"
     password = "test"
@@ -21,7 +21,5 @@ if __name__ == "__main__":
     app.close()
     load.stop_time()
     d.statistics.append(load)
-    
-    for stat in d.statistics:
-        print(stat.get_string())
-    """
+
+    d.gen_plot()
