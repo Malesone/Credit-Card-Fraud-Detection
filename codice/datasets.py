@@ -1,5 +1,4 @@
-import statistics
-from tracemalloc import Statistic
+import textwrap
 from typing import Any
 from neo4j import Transaction
 from pandas import DataFrame
@@ -7,6 +6,8 @@ from customers import Customer
 from terminals import Terminal
 from transactions import Transaction
 from statistics import Statistic
+
+from matplotlib import pyplot as plt
 
 import datetime
 import random
@@ -17,6 +18,7 @@ import csv
 import numpy as np
 import time 
 from enum import Enum
+import matplotlib.pyplot as plt
 
 class Operation(Enum):
     customers = "generate customers"
@@ -32,8 +34,6 @@ class Dataset:
     transactions: Transaction
     statistics = []
 
-    x: Any
-
     DIR_PKL = "./dataset_pkl/"
     DIR_CSV = "./dataset_csv/"
 
@@ -45,13 +45,16 @@ class Dataset:
         
         self.transactions = Transaction()
         self.gen_transaction(nb_days, radius)
-
         self.transactions.dataset = self.add_frauds(self.customers.dataset, self.terminals.dataset, self.transactions.dataset)
         
         self.calculate_amounts()
         gen.stop_time()
         self.statistics.append(gen)
 
+        self.save_all()
+        self.gen_plot()
+
+    def save_all(self):
         save = Statistic(type = Operation.save.value)
         self.to_pickle()
         save.stop_time()
@@ -59,8 +62,7 @@ class Dataset:
         self.deserializate()
         des.stop_time()
 
-        self.statistics.append(save)
-        self.statistics.append(des)
+        self.statistics.extend([save, des])
         
     def add_frauds(self, customer_profiles_table, terminal_profiles_table, transactions_df):
         # By default, all transactions are genuine
@@ -189,7 +191,7 @@ class Dataset:
                 df.to_csv(nome, index=False)
                 total_size += os.path.getsize(nome)
 
-        total_size /= 1024
+        total_size = total_size / 1024 / 1024
         print("Total dim: ", total_size, "MB")
 
     def calculate_amounts(self):
@@ -198,3 +200,25 @@ class Dataset:
             sum.append(self.transactions.dataset[self.transactions.dataset['CUSTOMER_ID']==id]['TX_AMOUNT'].sum())
             
         self.customers.dataset['AMOUNT'] = sum
+
+    def gen_plot(self):
+        statOps = []
+        statVal = []
+        text = ""
+        for stat in self.statistics: 
+            text += r' '+stat.get_string() + "\n"
+            statOps.append(stat.type)
+            statVal.append(stat.time)
+
+        fig = plt.figure()
+        ax1 = fig.add_axes((0.1, 0.2, 0.8, 0.7))
+        
+        plt.bar(statOps, statVal, align="center")
+        ax1.set_title("Operations")
+        ax1.set_xlabel('Operation')
+        ax1.set_ylabel('Time')
+        
+        fig.text(.5, .05, text, ha='center', bbox={"facecolor": "orange", "alpha": 0.5})
+        fig.set_size_inches(7, 8, forward=True)
+
+        plt.show()
