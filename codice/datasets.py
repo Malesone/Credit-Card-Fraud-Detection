@@ -27,6 +27,8 @@ class Operation(Enum):
     generation = "datasets generation"
     deserialization = "deserialize"
     save = "save"
+    extension = "extension"
+    tpp = "get transactions per period"
 
 class Dataset: 
     customers: Customer
