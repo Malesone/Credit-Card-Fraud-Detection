@@ -41,11 +41,11 @@ class Dataset:
 
     def generate_dataset(self, n_customers, n_terminals, nb_days, radius):
         gen = Statistic(type = Operation.generation.value)
-        self.customers = Customer(n_customers)
+        self.customers = Customer(True, n_customers)
         
-        self.terminals = Terminal(n_terminals)
+        self.terminals = Terminal(True, n_terminals)
         
-        self.transactions = Transaction()
+        self.transactions = Transaction(True)
         self.gen_transaction(nb_days, radius)
         self.transactions.dataset = self.add_frauds(self.customers.dataset, self.terminals.dataset, self.transactions.dataset)
         
@@ -56,11 +56,16 @@ class Dataset:
         self.save_all()
 
     def read_dataset(self):
-        self.customers = pd.read_pickle(self.DIR_PKL+"customers.pkl")
-        self.terminals = pd.read_pickle(self.DIR_PKL+"terminals.pkl")
-        self.transactions = pd.read_pickle(self.DIR_PKL+"transactions.pkl")
-
+        self.customers = Customer(False, path=self.DIR_PKL+"customers.pkl")
+        self.terminals = Terminal(False, path=self.DIR_PKL+"terminals.pkl")
+        self.transactions = Transaction()
+        self.transactions.dataset = pd.read_pickle(self.DIR_PKL+"transactions.pkl")
+        
         print("dataset readed")
+        print(self.transactions.dataset.count)
+        #print(self.customers.dataset)
+        #print(self.terminals.dataset)
+        #print(self.transactions.dataset)
 
     def save_all(self):
         save = Statistic(type = Operation.save.value)

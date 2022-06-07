@@ -9,8 +9,11 @@ class Terminal:
     dataset: DataFrame
     gen_time: float
 
-    def __init__(self, n_terminals):
-        self.generate_profiles_table(n_terminals)
+    def __init__(self, gen, n_terminals=0, path=""):
+        if gen:
+            self.generate_profiles_table(n_terminals)
+        else:
+            self.dataset = pd.read_pickle(path)
     
     def generate_profiles_table(self, n_terminals, random_state=0):
         self.gen_time = time.time()

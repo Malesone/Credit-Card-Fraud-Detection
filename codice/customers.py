@@ -7,9 +7,13 @@ class Customer:
     dataset: DataFrame
     gen_time: float
 
-    def __init__(self, n_customers):
-        self.generate_profiles_table(n_customers, 0)
-    
+    def __init__(self, gen, n_customers=0, path=""):
+        if gen:
+            self.generate_profiles_table(n_customers, 0)
+        else:
+            self.dataset = pd.read_pickle(path)
+
+
     def generate_profiles_table(self, n_customers, random_state=0):
         self.gen_time = time.time()
         np.random.seed(random_state) 
