@@ -8,7 +8,7 @@ if __name__ == "__main__":
     start_time=time.time()
     d = Dataset()
     #d.generate_dataset(n_customers = 100, n_terminals = 10, nb_days = 10, radius = 5) 
-    d.read_dataset()
+    d.read_dataset() #
 
     load = Statistic(type = Operation.generation.value)
     app = App()

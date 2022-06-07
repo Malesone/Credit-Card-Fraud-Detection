@@ -36,7 +36,7 @@ class Dataset:
     transactions: Transaction
     statistics = []
 
-    DIR_PKL = "./dataset_pkl/"
+    DIR_PKL = "./dataset_100MB/"
     DIR_CSV = "./dataset_csv/"
 
     def generate_dataset(self, n_customers, n_terminals, nb_days, radius):
