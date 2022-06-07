@@ -15,14 +15,19 @@ import ast
 
 class App:
   session: Any
-
-  def __init__(self, uri, user, password):
-    self.driver = GraphDatabase.driver(uri, auth=(user, password))
+  uri = "bolt://localhost:7687"
+  user = "neo4j"
+  password = "test"
+    
+  def __init__(self):
+    self.driver = GraphDatabase.driver(self.uri, auth=(self.user, self.password))
     self.session = self.driver.session()
+    print("Connected")
 
   def close(self):
     self.driver.close()
-            
+
+  ############ start CREATION ############ 
   def create_all(self, customers, terminals, transactions):    
     arrayC = customers.to_numpy()
     arrayT = terminals.to_numpy()
@@ -91,6 +96,9 @@ class App:
       "CREATE (c)-[u:Transaction {id: id, date: date(date), amount: amount, fraud: fraud}]->(t) "   
     )
     self.session.run(query)
+
+  ############ end CREATION ############ 
+
 
   @staticmethod
   def _create_connection_customer_terminal(tx, dict):
@@ -183,6 +191,7 @@ class App:
       
     return cCollected
 
+  ############ start EXTENSION ############ 
   def extension(self):
     self.extend_transactions()
     self.buying_friends()
@@ -222,6 +231,8 @@ class App:
       )
     self.session.run(query)
 
+  ############ end EXTENSION ############ 
+
   def transactions_per_period(self):
     query = (
       "match ()-[t: Transaction]-() "
@@ -241,3 +252,4 @@ class App:
         )
 
     self.session.run(query)
+    print("old db deleted")
