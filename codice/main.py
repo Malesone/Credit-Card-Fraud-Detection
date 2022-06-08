@@ -5,9 +5,8 @@ from neo4j_app import App
 from datasets import Operation
 
 if __name__ == "__main__":
-    start_time=time.time()
     d = Dataset()
-    #d.generate_dataset(n_customers = 11400, n_terminals = 2000, nb_days = 150, radius = 20) 
+    #d.generate_dataset(n_customers = 5700, n_terminals = 10000, nb_days = 150, radius = 10) 
     d.read_dataset() 
     
     load = Statistic(type = Operation.generation.value)
@@ -25,7 +24,7 @@ if __name__ == "__main__":
     app.transactions_per_period()
     tpp.stop_time()
     """
-    #app.close()
+    app.close()
 
     #d.statistics.extend([load, extension, tpp])
     d.statistics.append(load)

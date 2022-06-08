@@ -63,7 +63,6 @@ class Dataset:
         self.transactions.dataset = pd.read_pickle(self.DIR_PKL+"transactions.pkl")
         
         print("dataset readed")
-        #self.to_csv()
         self.deserializate()
 
     def save_all(self):
