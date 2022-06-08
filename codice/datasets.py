@@ -62,11 +62,7 @@ class Dataset:
         self.transactions.dataset = pd.read_pickle(self.DIR_PKL+"transactions.pkl")
         
         print("dataset readed")
-        print(self.transactions.dataset.count)
-        #print(self.customers.dataset)
-        #print(self.terminals.dataset)
-        #print(self.transactions.dataset)
-
+    
     def save_all(self):
         save = Statistic(type = Operation.save.value)
         self.to_pickle()
