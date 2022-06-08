@@ -7,7 +7,7 @@ from datasets import Operation
 if __name__ == "__main__":
     start_time=time.time()
     d = Dataset()
-    #d.generate_dataset(n_customers = 100, n_terminals = 10, nb_days = 10, radius = 5) 
+    #d.generate_dataset(n_customers = 11400, n_terminals = 2000, nb_days = 150, radius = 20) 
     d.read_dataset() 
     
     load = Statistic(type = Operation.generation.value)
@@ -16,7 +16,7 @@ if __name__ == "__main__":
     
     app.create_all(d.customers.dataset, d.terminals.dataset, d.transactions.dataset)
     load.stop_time()
-
+    
     """extension = Statistic(type = Operation.extension.value)
     app.extension()
     extension.stop_time()
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     app.transactions_per_period()
     tpp.stop_time()
     """
-    app.close()
+    #app.close()
 
     #d.statistics.extend([load, extension, tpp])
     d.statistics.append(load)

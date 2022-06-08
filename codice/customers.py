@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from pandas import DataFrame
 import time 
+from tqdm import tqdm
 
 class Customer:
     dataset: DataFrame
@@ -19,7 +20,7 @@ class Customer:
         np.random.seed(random_state) 
         customer_id_properties=[]
         # Generate customer properties from random distributions 
-        for customer_id in range(n_customers):
+        for customer_id in tqdm(range(n_customers)):
             x_customer_id = np.random.uniform(0,100)
             y_customer_id = np.random.uniform(0,100)
             mean_amount = np.random.uniform(5,100) # Arbitrary (but sensible) value 
@@ -38,8 +39,7 @@ class Customer:
                                                                         'mean_nb_tx_per_day'])
 
         self.gen_time = time.time()-self.gen_time
-        #print("gen CUSTOMER: {0:.2}s".format(self.gen_time))       
-        
+         
     def get_dataset(self):
         print(self.dataset)
     

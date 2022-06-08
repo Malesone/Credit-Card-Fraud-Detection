@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from pandas import DataFrame
 import time
+from tqdm import tqdm
 
 from pydantic import TimeError
 
@@ -19,7 +20,7 @@ class Terminal:
         self.gen_time = time.time()
         np.random.seed(random_state)
         terminal_id_properties=[]
-        for terminal_id in range(n_terminals):
+        for terminal_id in tqdm(range(n_terminals)):
             x_terminal_id = np.random.uniform(0,100)
             y_terminal_id = np.random.uniform(0,100)
             terminal_id_properties.append([terminal_id,

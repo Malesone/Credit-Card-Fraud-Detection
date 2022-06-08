@@ -1,3 +1,4 @@
+from lib2to3.pgen2.token import OP
 import textwrap
 from typing import Any
 from neo4j import Transaction
@@ -36,8 +37,8 @@ class Dataset:
     transactions: Transaction
     statistics = []
 
-    DIR_PKL = "./dataset_100MB/"
-    DIR_CSV = "./dataset_csv/"
+    DIR_PKL = "./dataset_200MB/"
+    DIR_CSV = "./dataset_200MB/"
 
     def generate_dataset(self, n_customers, n_terminals, nb_days, radius):
         gen = Statistic(type = Operation.generation.value)
@@ -45,7 +46,7 @@ class Dataset:
         
         self.terminals = Terminal(True, n_terminals)
         
-        self.transactions = Transaction(True)
+        self.transactions = Transaction()
         self.gen_transaction(nb_days, radius)
         self.transactions.dataset = self.add_frauds(self.customers.dataset, self.terminals.dataset, self.transactions.dataset)
         
@@ -62,16 +63,12 @@ class Dataset:
         self.transactions.dataset = pd.read_pickle(self.DIR_PKL+"transactions.pkl")
         
         print("dataset readed")
-    
-    def save_all(self):
-        save = Statistic(type = Operation.save.value)
-        self.to_pickle()
-        save.stop_time()
-        des = Statistic(type = Operation.deserialization.value)
+        #self.to_csv()
         self.deserializate()
-        des.stop_time()
 
-        self.statistics.extend([save, des])
+    def save_all(self):
+        self.to_pickle()
+        self.deserializate()
         
     def add_frauds(self, customer_profiles_table, terminal_profiles_table, transactions_df):
         # By default, all transactions are genuine
@@ -165,6 +162,7 @@ class Dataset:
         return available_terminals
 
     def to_pickle(self): #salva tutti i dati generati sotto forma di .pkl
+        save = Statistic(type = Operation.save.value)
         if not os.path.exists(self.DIR_PKL):
             os.makedirs(self.DIR_PKL)
         
@@ -174,34 +172,30 @@ class Dataset:
 
         self.transactions.dataset.to_pickle(self.DIR_PKL+"transactions.pkl", protocol=4)
         
-    def deserializate(self): 
+        save.stop_time()
+        self.statistics.append(save)
+
+    def deserializate(self):
+        stat = Statistic(Operation.deserialization.value) 
         files = []
         total_size = 0
         if not os.path.exists(self.DIR_CSV):
                 os.makedirs(self.DIR_CSV)
 
-        dir = os.path.join('.','dataset_pkl')
+        cust = self.DIR_CSV+"customers.csv"
+        terms = self.DIR_CSV+"terminals.csv"
+        trans = self.DIR_CSV+"transactions.csv"
 
-        with os.scandir(self.DIR_PKL) as entries:
-            for entry in entries:
-                name = entry.name
-                files.append(name)
-
-        files.sort()
-
-        for entry in files: 
-            name = self.DIR_PKL+entry
-            with open(name, 'rb') as f:
-                data = pickle.load(f)
-                if not os.path.exists(dir):
-                    os.mkdir(dir)    
-                nome = self.DIR_CSV+entry.replace(".pkl", ".csv")
-                df = pd.DataFrame(data)
-                df.to_csv(nome, index=False)
-                total_size += os.path.getsize(nome)
-
+        self.customers.dataset.to_csv(cust, index=False)
+        self.terminals.dataset.to_csv(terms, index=False)
+        self.transactions.dataset.to_csv(trans, index=False)
+        
+        total_size = os.path.getsize(cust) +  os.path.getsize(terms) + os.path.getsize(trans) 
         total_size = total_size / 1024 / 1024
         print("Total dim: ", total_size, "MB")
+        
+        stat.stop_time()
+        self.statistics.append(stat)
 
     def calculate_amounts(self):
         sum = []

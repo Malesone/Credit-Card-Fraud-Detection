@@ -12,6 +12,7 @@ import numpy as np
 from collections import defaultdict
 import time
 import ast
+from tqdm import tqdm
 
 class App:
   session: Any
@@ -36,29 +37,11 @@ class App:
     self.create_terminals(arrayT)
 
     arrayTransactions = transactions.to_numpy()
-    print(len(arrayTransactions))
-    arrayT = [[val[2], val[3], [val[0], val[1].date().strftime('%Y-%m-%d'), val[4], val[7]]] for val in arrayTransactions]
-    
-    connections = {}
-    for val in arrayT:
-      if not str([val[0], val[1]]) in connections:
-        connections[str([val[0], val[1]])] = [val[2]]
-      else:
-        connections[str([val[0], val[1]])].append(val[2])
-
-    arrayT = []
-    for key, value in connections.items():
-      v = ast.literal_eval(key)
-      arrayT.append([v[0], v[1], value])
-
-    at_split = [arrayT]
-    t = 1000
-    while len (at_split [-1]) >= 2 * t:
-      at_split [-1:] = [at_split [-1][:t], at_split [-1][t:]]
-    
-    for chunk in at_split:
-      self.create_transaction(str(chunk))
-
+    lenT = len(arrayTransactions)
+    for i in tqdm(range(lenT)):
+        val = arrayTransactions[i]
+        self.create_transaction(str([val[2], val[3], val[0], val[1].date().strftime('%Y-%m-%d'), val[4], val[7]]))    
+        
   def create_customers(self, array):
     arrayC = [[val[0], val[1], val[2], val[8]] for val in array]
     arrayC = str(arrayC)
@@ -84,16 +67,11 @@ class App:
     self.session.run(query)
     print("Terminal nodes created")
 
-  def create_transaction(self, array):
-    print("RUNNING QUERY TRANSACTION")
+  def create_transaction(self, unw):
     query = (
-      "WITH " + array +" AS array "
-      "UNWIND array as unw "
-      "WITH unw[0] as cn, unw[1] as tn, unw[2] as tr "
-      "MATCH (c:Customer {id: cn}), (t:Terminal {id: tn}) "
-      "UNWIND tr as value "
-      "WITH value[0] as id, value[1] as date, value[2] as amount, value[3] as fraud, c, t "
-      "CREATE (c)-[u:Transaction {id: id, date: date(date), amount: amount, fraud: fraud}]->(t) "   
+      "WITH " + unw +" AS unw "
+      "MATCH (c:Customer {id: unw[0]}), (t:Terminal {id: unw[1]}) "
+      "CREATE (c)-[u:Transaction {id: unw[2], date: date(unw[3]), amount: unw[4], fraud: unw[5]}]->(t) "   
     )
     self.session.run(query)
 
