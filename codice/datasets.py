@@ -30,6 +30,7 @@ class Operation(Enum):
     save = "save"
     extension = "extension"
     tpp = "get transactions per period"
+    queries_execution = "queries execution"
 
 class Dataset: 
     customers: Customer
@@ -37,10 +38,10 @@ class Dataset:
     transactions: Transaction
     statistics = []
 
-    DIR_PKL = "./dataset_200MB/"
-    DIR_CSV = "./dataset_200MB/"
+    DIR = "./dataset_200MB/"
 
     def generate_dataset(self, n_customers, n_terminals, nb_days, radius):
+        print("Generazione in corso...")
         gen = Statistic(type = Operation.generation.value)
         self.customers = Customer(True, n_customers)
         
@@ -55,15 +56,22 @@ class Dataset:
         self.statistics.append(gen)
 
         self.save_all()
+        print("Generazione completata")
 
-    def read_dataset(self):
-        self.customers = Customer(False, path=self.DIR_PKL+"customers.pkl")
-        self.terminals = Terminal(False, path=self.DIR_PKL+"terminals.pkl")
-        self.transactions = Transaction()
-        self.transactions.dataset = pd.read_pickle(self.DIR_PKL+"transactions.pkl")
-        
-        print("dataset readed")
-        self.deserializate()
+    def read_dataset(self, dir):
+        print("Lettura in corso...")
+        self.DIR = dir
+
+        if not os.path.exists(self.DIR):
+            print("Cartella non presente. Creare prima i dataset")
+        else:
+            self.customers = Customer(False, path=self.DIR+"customers.pkl")
+            self.terminals = Terminal(False, path=self.DIR+"terminals.pkl")
+            self.transactions = Transaction()
+            self.transactions.dataset = pd.read_pickle(self.DIR+"transactions.pkl")
+            
+            self.deserializate()
+            print("Lettura completata")
 
     def save_all(self):
         self.to_pickle()
@@ -162,14 +170,14 @@ class Dataset:
 
     def to_pickle(self): #salva tutti i dati generati sotto forma di .pkl
         save = Statistic(type = Operation.save.value)
-        if not os.path.exists(self.DIR_PKL):
-            os.makedirs(self.DIR_PKL)
+        if not os.path.exists(self.DIR):
+            os.makedirs(self.DIR)
         
-        self.customers.dataset.to_pickle(self.DIR_PKL+"customers.pkl", protocol=4)
+        self.customers.dataset.to_pickle(self.DIR+"customers.pkl", protocol=4)
         
-        self.terminals.dataset.to_pickle(self.DIR_PKL+"terminals.pkl", protocol=4)
+        self.terminals.dataset.to_pickle(self.DIR+"terminals.pkl", protocol=4)
 
-        self.transactions.dataset.to_pickle(self.DIR_PKL+"transactions.pkl", protocol=4)
+        self.transactions.dataset.to_pickle(self.DIR+"transactions.pkl", protocol=4)
         
         save.stop_time()
         self.statistics.append(save)
@@ -178,12 +186,10 @@ class Dataset:
         stat = Statistic(Operation.deserialization.value) 
         files = []
         total_size = 0
-        if not os.path.exists(self.DIR_CSV):
-                os.makedirs(self.DIR_CSV)
 
-        cust = self.DIR_CSV+"customers.csv"
-        terms = self.DIR_CSV+"terminals.csv"
-        trans = self.DIR_CSV+"transactions.csv"
+        cust = self.DIR+"customers.csv"
+        terms = self.DIR+"terminals.csv"
+        trans = self.DIR+"transactions.csv"
 
         self.customers.dataset.to_csv(cust, index=False)
         self.terminals.dataset.to_csv(terms, index=False)

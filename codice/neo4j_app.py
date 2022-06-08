@@ -19,11 +19,16 @@ class App:
   uri = "bolt://localhost:7687"
   user = "neo4j"
   password = "test"
-    
+  created = False
+
   def __init__(self):
+    self.created = False
+
+  def create_app(self):
     self.driver = GraphDatabase.driver(self.uri, auth=(self.user, self.password))
     self.session = self.driver.session()
     print("Connected")
+    self.created = True
 
   def close(self):
     self.driver.close()
@@ -78,46 +83,36 @@ class App:
   ############ end CREATION ############ 
 
 
-  @staticmethod
-  def _create_connection_customer_terminal(tx, dict):
-    for key, value in dict.items():
-        for item in value:
-            query = (
-                "match (c:Customer {name: $key}) MATCH (tr:Terminal {name: $item})"
-                "CREATE (c)-[:connect]->(tr) "
-                "RETURN tr"
-            )
-            tx.run(query, key=key, item=item)
+  ############ start QUERIES ############ 
+  def execute_queries(self, month):
+    print("Stampa somma totale per customer... ")
+    #self.return_amount_customer(month)
+    print("Stampa transazioni fraudolente... ")
+    self.fraudolent_transactions()
 
-  def amount_customer(self, month):
-    with self.driver.session() as session:
-        result = session.read_transaction(self._return_amount_customer, month)
-        for row in result:
-            print(row)
-
-  @staticmethod
-  def _return_amount_customer(tx, month):
+  def return_amount_customer(self, month):
     query = (
-        "MATCH (c:Customer)-[:make]->(t:Transaction)"
-        "WHERE datetime({date:t.date}) >= datetime('2022-1-1') and datetime({date:t.date}) <= datetime('2022-1-31')"
-        "RETURN c.name, t.date, sum(t.amount)"
+        """
+        MATCH (c:Customer)-[t:Transaction]->() 
+        WHERE datetime({date:t.date}) >= datetime('AAAA-MM-GG') and datetime({date:t.date}) <= datetime('AAAA-MM-GG') 
+        RETURN c.id, t.date, sum(t.amount)
+        """
     )
-    result = tx.run(query, month=month)
-    return [row for row in result]
+    result = self.session.run(query, month=month)
+    print([row for row in result])
 
   def fraudolent_transactions(self):
-    with self.driver.session() as session:
-        result = session.read_transaction(self._return_fraudolent_transactions, )
-        for row in result:
-            print(row)
-
-  @staticmethod
-  def _return_fraudolent_transactions(tx):
     query = (
-        "match (t:Transaction)<-[:from]-(tr:Terminal) with tr.name as name, avg(t.amount) as avg_amount, date.truncate('month', t.date) as month match (trr:Terminal)-[:from]->(t1:Transaction) where t1.amount > avg_amount/2 and date.truncate('month', t1.date) = month and trr.name = name return t1"
+        """
+        match (tr:Terminal)<-[t:Transaction]-() 
+        with tr.id as id, avg(t.amount) as avg_amount, date.truncate('month', t.date) as month 
+        match (trr:Terminal)<-[t1:Transaction]-() 
+        where t1.amount > avg_amount/2 and date.truncate('month', t1.date) = month and trr.id = id 
+        return t1 
+        """
     )
-    result = tx.run(query)
-    return [row for row in result]
+    result = self.session.run(query)
+    print([row for row in result])
 
   @staticmethod
   def _return_cocustomer(tx, id, n):
@@ -168,6 +163,7 @@ class App:
       p = str([el for el in result[0]][2])
       
     return cCollected
+  ############ end QUERIES ############ 
 
   ############ start EXTENSION ############ 
   def extension(self):
