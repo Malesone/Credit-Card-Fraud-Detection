@@ -30,20 +30,6 @@ class Transaction:
                     time_tx = int(np.random.normal(86400/2, 20000))
                     
                     if (time_tx>0) and (time_tx<86400):
-                        #morning = 6-12
-                        #afternoon = 12-17
-                        #evening = 17-22
-                        #night = 22-6
-                        
-                        """if(time_tx>=21600 and time_tx<43200):
-                            moment = Moment.morning
-                        elif(time_tx>=43200 and time_tx<61200):
-                            moment = Moment.afternoon
-                        elif(time_tx>=61200 and time_tx<79200):
-                            moment = Moment.evening
-                        else:
-                            moment = Moment.night"""
-
                         # Amount is drawn from a normal distribution  
                         amount = np.random.normal(customer_profile.mean_amount, customer_profile.std_amount)
                         

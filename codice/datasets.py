@@ -7,9 +7,6 @@ from customers import Customer
 from terminals import Terminal
 from transactions import Transaction
 from statistics import Statistic
-
-from matplotlib import pyplot as plt
-
 import datetime
 import random
 import os
@@ -29,7 +26,7 @@ class Operation(Enum):
     deserialization = "deserialize"
     save = "save"
     ### EXTENSION ###
-    moments = "day moments"
+    moments_products = "day moments and products"
     buying_friends = "buying friends"
     tpp = "get transactions per period"
     ### EXTENSION ###
@@ -44,26 +41,26 @@ class Dataset:
     customers: Customer
     terminals: Terminal
     transactions: Transaction
-    statistics = []
 
     DIR = "./dataset_200MB/"
 
     def generate_dataset(self, n_customers, n_terminals, nb_days, radius):
         print("Generazione in corso...")
+        statistics = []
+        
         gen = Statistic(type = Operation.generation.value)
         self.customers = Customer(True, n_customers)
         
         self.terminals = Terminal(True, n_terminals)
-        
+
         self.transactions = Transaction()
         self.gen_transaction(nb_days, radius)
         self.transactions.dataset = self.add_frauds(self.customers.dataset, self.terminals.dataset, self.transactions.dataset)
         
         self.calculate_amounts()
         gen.stop_time()
-        self.statistics.append(gen)
+        statistics.extend([gen, self.save_all()])
 
-        self.save_all()
         print("Generazione completata")
 
     def read_dataset(self, dir):
@@ -82,8 +79,10 @@ class Dataset:
             print("Lettura completata")
 
     def save_all(self):
-        self.to_pickle()
-        self.deserializate()
+        statistics = []
+        statistics.append(self.to_pickle())
+        statistics.append(self.deserializate())
+        return statistics
         
     def add_frauds(self, customer_profiles_table, terminal_profiles_table, transactions_df):
         # By default, all transactions are genuine
@@ -94,7 +93,7 @@ class Dataset:
         transactions_df.loc[transactions_df.TX_AMOUNT>220, 'TX_FRAUD']=1
         transactions_df.loc[transactions_df.TX_AMOUNT>220, 'TX_FRAUD_SCENARIO']=1
         nb_frauds_scenario_1=transactions_df.TX_FRAUD.sum()
-        print("Number of frauds from scenario 1: "+str(nb_frauds_scenario_1))
+        print("Numero di frodi dal scenario 1: "+str(nb_frauds_scenario_1))
         
         # Scenario 2
         for day in range(transactions_df.TX_TIME_DAYS.max()):
@@ -109,7 +108,7 @@ class Dataset:
             transactions_df.loc[compromised_transactions.index,'TX_FRAUD_SCENARIO']=2
         
         nb_frauds_scenario_2=transactions_df.TX_FRAUD.sum()-nb_frauds_scenario_1
-        print("Number of frauds from scenario 2: "+str(nb_frauds_scenario_2))
+        print("Numero di frodi dal scenario 2: "+str(nb_frauds_scenario_2))
         
         # Scenario 3
         for day in range(transactions_df.TX_TIME_DAYS.max()):
@@ -132,7 +131,7 @@ class Dataset:
             
                                 
         nb_frauds_scenario_3=transactions_df.TX_FRAUD.sum()-nb_frauds_scenario_2-nb_frauds_scenario_1
-        print("Number of frauds from scenario 3: "+str(nb_frauds_scenario_3))
+        print("Numero di frodi dal scenario 3: "+str(nb_frauds_scenario_3))
         
         return transactions_df                 
 
@@ -188,7 +187,7 @@ class Dataset:
         self.transactions.dataset.to_pickle(self.DIR+"transactions.pkl", protocol=4)
         
         save.stop_time()
-        self.statistics.append(save)
+        return save
 
     def deserializate(self):
         stat = Statistic(Operation.deserialization.value) 
@@ -205,10 +204,10 @@ class Dataset:
         
         total_size = os.path.getsize(cust) +  os.path.getsize(terms) + os.path.getsize(trans) 
         total_size = total_size / 1024 / 1024
-        print("Total dim: ", total_size, "MB")
+        print("Dimensione totale: ", total_size, "MB")
         
         stat.stop_time()
-        self.statistics.append(stat)
+        return stat
 
     def calculate_amounts(self):
         sum = []
@@ -217,24 +216,3 @@ class Dataset:
             
         self.customers.dataset['AMOUNT'] = sum
 
-    def gen_plot(self):
-        statOps = []
-        statVal = []
-        text = ""
-        for stat in self.statistics: 
-            text += r' '+stat.get_string() + "\n"
-            statOps.append(stat.type)
-            statVal.append(stat.time)
-
-        fig = plt.figure()
-        ax1 = fig.add_axes((0.1, 0.2, 0.8, 0.7))
-        
-        plt.bar(statOps, statVal, align="center")
-        ax1.set_title("Operations")
-        ax1.set_xlabel('Operation')
-        ax1.set_ylabel('Time')
-        
-        fig.text(.5, .05, text, ha='center', bbox={"facecolor": "orange", "alpha": 0.5})
-        fig.set_size_inches(7, 8, forward=True)
-
-        plt.show()
