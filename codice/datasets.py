@@ -31,6 +31,11 @@ class Operation(Enum):
     extension = "extension"
     tpp = "get transactions per period"
     queries_execution = "queries execution"
+    amount_spent = "amount spent"
+    identify_fraud = "identification of frauds"
+    co_customer = "co-customer"
+
+
 
 class Dataset: 
     customers: Customer

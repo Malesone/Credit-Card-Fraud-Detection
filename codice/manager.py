@@ -5,7 +5,7 @@ from neo4j_app import App
 from statistics import Statistic
 from typing import Any
 
-class Manage: 
+class Manager: 
     show = True
     d = Dataset()
     app = App()
@@ -58,12 +58,25 @@ class Manage:
     def exec_queries(self): #4. esecuzione query
         if not(self.app.created): 
             self.app.create_app()
-            
+        
         print("Esecuzione query... ")
-        exec = Statistic(type = Operation.queries_execution)
-        self.app.execute_queries("02")
-        exec.stop_time()
-        self.d.statistics.append(exec)
+        s1 = Statistic(type = Operation.amount_spent.value)
+        print("Stampa somma totale per customer... ")
+        self.app.return_amount_customer("02")
+        s1.stop_time()
+        s2 = Statistic(type = Operation.identify_fraud.value)
+        print("Stampa transazioni fraudolente... ")
+        self.app.fraudolent_transactions()
+        s2.stop_time()
+        s3 = Statistic(type = Operation.co_customer.value)
+        id_customer = input("\n\nScegli il numero del customer: ")
+        k_customer = input("Scegli il grado: ")
+        print("Stampa co-customer in corso...")
+
+        self.app.return_cocustomer(int(id_customer), int(k_customer))
+        s3.stop_time()
+        
+        self.d.statistics.extend([s1, s2, s3])
 
     def domain_extension(self): #5. estensione dominio
         if not(self.app.created): 
@@ -83,6 +96,9 @@ class Manage:
     def statistics(self):
         if self.check_gen():
             self.d.gen_plot()
+        
+        for stat in self.d.statistics:
+            print(stat.get_string())
 
     def exit(self):
         self.show = False
@@ -116,3 +132,7 @@ class Manage:
                 self.app.create_app()
             
         return self.gen[0] or self.gen[1]
+
+if __name__ == "__main__":
+    manager = Manager()
+    manager.start()

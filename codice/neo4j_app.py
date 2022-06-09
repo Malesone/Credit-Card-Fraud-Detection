@@ -13,6 +13,7 @@ from collections import defaultdict
 import time
 import ast
 from tqdm import tqdm
+from statistics import Statistic
 
 class App:
   session: Any
@@ -84,17 +85,11 @@ class App:
 
 
   ############ start QUERIES ############ 
-  def execute_queries(self, month):
-    print("Stampa somma totale per customer... ")
-    #self.return_amount_customer(month)
-    print("Stampa transazioni fraudolente... ")
-    self.fraudolent_transactions()
-
   def return_amount_customer(self, month):
     query = (
         """
         MATCH (c:Customer)-[t:Transaction]->() 
-        WHERE datetime({date:t.date}) >= datetime('AAAA-MM-GG') and datetime({date:t.date}) <= datetime('AAAA-MM-GG') 
+        WHERE datetime({date:t.date}) >= datetime('2022-01-01') and datetime({date:t.date}) <= datetime('2022-03-02') 
         RETURN c.id, t.date, sum(t.amount)
         """
     )
@@ -114,15 +109,13 @@ class App:
     result = self.session.run(query)
     print([row for row in result])
 
-  @staticmethod
-  def _return_cocustomer(tx, id, n):
+  def return_cocustomer(self, id, n):
     cCollected = "[]"
     tCollected = "[]"
     p = "[]"
 
     if (n == 0):
       return cCollected
-
     
     query = (
           """
@@ -137,7 +130,7 @@ class App:
           """
     )
     
-    result = [row for row in tx.run(query)]
+    result = [row for row in self.session.run(query)]
     cCollected = str([el for el in result[0]][0])
     tCollected = str([el for el in result[0]][1])
     p = str([el for el in result[0]][2])
@@ -157,12 +150,13 @@ class App:
 
           """
       )
-      result = [row for row in tx.run(query)]
+      result = [row for row in self.session.run(query)]
       cCollected = str([el for el in result[0]][0])
       tCollected = str([el for el in result[0]][1])
       p = str([el for el in result[0]][2])
       
     return cCollected
+  
   ############ end QUERIES ############ 
 
   ############ start EXTENSION ############ 

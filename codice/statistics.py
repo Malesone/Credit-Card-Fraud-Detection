@@ -12,7 +12,7 @@ class Statistic:
     
     def stop_time(self):
         self.time = (time.time()-self.time)/60
-        self.time = round(self.time, 2)
+        #self.time = round(self.time, 2)
 
     def get_string(self):
         return "Time to " + str(self.type) + ": " + str(self.time) + " minutes"
