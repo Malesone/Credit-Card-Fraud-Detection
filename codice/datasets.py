@@ -28,8 +28,11 @@ class Operation(Enum):
     generation = "datasets generation"
     deserialization = "deserialize"
     save = "save"
-    extension = "extension"
+    ### EXTENSION ###
+    moments = "day moments"
+    buying_friends = "buying friends"
     tpp = "get transactions per period"
+    ### EXTENSION ###
     queries_execution = "queries execution"
     amount_spent = "amount spent"
     identify_fraud = "identification of frauds"

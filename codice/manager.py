@@ -68,9 +68,10 @@ class Manager:
         print("Stampa transazioni fraudolente... ")
         self.app.fraudolent_transactions()
         s2.stop_time()
-        s3 = Statistic(type = Operation.co_customer.value)
         id_customer = input("\n\nScegli il numero del customer: ")
         k_customer = input("Scegli il grado: ")
+        s3 = Statistic(type = Operation.co_customer.value)
+
         print("Stampa co-customer in corso...")
 
         self.app.return_cocustomer(int(id_customer), int(k_customer))
@@ -83,24 +84,26 @@ class Manager:
             self.app.create_app()
 
         print("Estensione dominio... ")
-        extension = Statistic(type = Operation.extension.value)
-        self.app.extension()
-        extension.stop_time()
-        
-        tpp = Statistic(type = Operation.tpp.value)
+        e1 = Statistic(type = Operation.moments.value)    
+        self.app.extend_transactions()
+        e1.stop_time()
+        e2 = Statistic(type = Operation.buying_friends.value)    
+        self.app.buying_friends()
+        e2.stop_time()
+        e3 = Statistic(type = Operation.tpp.value)
         self.app.transactions_per_period()
-        tpp.stop_time()
+        e3.stop_time()
 
-        self.d.statistics.extend([extension, tpp])
+        self.d.statistics.extend([e1, e2, e3])
     
-    def statistics(self):
+    def statistics(self): #6. ottieni statistiche
         if self.check_gen():
             self.d.gen_plot()
         
         for stat in self.d.statistics:
             print(stat.get_string())
 
-    def exit(self):
+    def exit(self): #0. chiusura
         self.show = False
         if self.gen[0] or self.gen[1]:
             self.app.close()

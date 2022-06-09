@@ -160,10 +160,6 @@ class App:
   ############ end QUERIES ############ 
 
   ############ start EXTENSION ############ 
-  def extension(self):
-    self.extend_transactions()
-    self.buying_friends()
-
   def extend_transactions(self):
     query = (
       "match (c)-[t]-(tr) "
@@ -199,18 +195,14 @@ class App:
       )
     self.session.run(query)
 
-  ############ end EXTENSION ############ 
-
   def transactions_per_period(self):
     query = (
-      "match ()-[t: Transaction]-() "
+      "match ()-[t: Transaction]->() "
       "with t.moment as moment, count(t) as transactions, sum(t.fraud) as fraudTransaction "
       "return moment, transactions, fraudTransaction "
     )
-    result = self.session.run(query)
-    for row in result:
-      concat = "PERIOD: " + row["moment"] + "\nTransactions: " + str(row["transactions"]) + "\nFraud transactions: " + str(row["fraudTransaction"])
-      print(concat + "\n")
+    self.session.run(query)
+  ############ end EXTENSION ############ 
 
 
   def delete_all(self):
